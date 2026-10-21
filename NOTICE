@@ -1,0 +1,17 @@
+tv-cleanup third-party notices
+
+launcher/
+  Taken from Clean Your TV, https://github.com/Gathin23/cleanyourtv
+  Commit b7aaa8870b234958c5656805621a4d42ac3989c7. MIT License, Copyright (c) 2026 Gathin.
+  Licence text: launcher/LICENSE-CLEANYOURTV.
+  Changes: one upstream banner for an app outside this project's scope is left out; SmartTube banner and glyph added.
+  Fonts: launcher/FONT-LICENSE-OFL.txt (SIL Open Font License, from upstream).
+
+Clean Your TV's safety rules (setup-wizard and HOME guards, bare package-name validation, BOM and CRLF handling)
+are re-implemented in scripts/. They are described in docs/safety.md.
+
+Playlists
+  iptv-org/iptv, https://github.com/iptv-org/iptv, Unlicense. Fetched at run time; not copied into this repository.
+
+Players
+  OwnTV (https://github.com/ahXN00/OwnTV) and SmartTube (https://github.com/yuliskov/SmartTube) are installed separately.

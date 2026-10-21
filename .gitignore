@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+.DS_Store
+.tv-cleanup/
+*.m3u
+launcher/.gradle/
+launcher/build/
+launcher/app/build/
+launcher/local.properties
