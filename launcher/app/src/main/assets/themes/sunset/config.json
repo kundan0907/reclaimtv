@@ -1,0 +1,11 @@
+{
+  "theme": "sunset",
+  "theme_label": "Sunset",
+  "background_color": "#120A1E",
+  "wallpaper": true,
+  "wallpaper_dim": 0,
+  "race_calendar": [],
+  "light_mode": false,
+  "widget_accent": "#FF8A5B",
+  "ambient_glow": false
+}

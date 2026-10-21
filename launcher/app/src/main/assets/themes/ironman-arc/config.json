@@ -1,0 +1,11 @@
+{
+  "theme": "ironman-arc",
+  "theme_label": "Iron Man \u00b7 Arc reactor",
+  "background_color": "#080404",
+  "wallpaper": true,
+  "wallpaper_dim": 0,
+  "race_calendar": [],
+  "light_mode": false,
+  "widget_accent": "#35D6F5",
+  "ambient_glow": false
+}

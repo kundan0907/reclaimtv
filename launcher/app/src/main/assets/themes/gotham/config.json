@@ -1,0 +1,11 @@
+{
+  "theme": "gotham",
+  "theme_label": "Gotham",
+  "background_color": "#0B0D10",
+  "wallpaper": true,
+  "wallpaper_dim": 0,
+  "race_calendar": [],
+  "light_mode": false,
+  "widget_accent": "#A9B4C8",
+  "ambient_glow": false
+}

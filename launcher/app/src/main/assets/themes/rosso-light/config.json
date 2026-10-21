@@ -1,0 +1,11 @@
+{
+  "theme": "rosso-light",
+  "theme_label": "Rosso Corsa \u00b7 Light",
+  "background_color": "#F3F1EF",
+  "wallpaper": true,
+  "wallpaper_dim": 0,
+  "race_calendar": [],
+  "light_mode": true,
+  "widget_accent": "#C9302C",
+  "ambient_glow": false
+}

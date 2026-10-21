@@ -16,10 +16,17 @@ import java.util.List;
 
 /** Remote-friendly settings owned by the launcher; system settings stay one row away. */
 public final class LauncherSettingsActivity extends Activity {
+    /** Intent extra: open the theme list at once (Settings menu, Theme). */
+    static final String PICK_THEME = "pick_theme";
     private SharedPreferences choices;
     private final TextView[] columnChoices = new TextView[4];
     private final TextView[] rowChoices = new TextView[4];
+    private TextView themeChoice;
     private TextView wallpaperChoice;
+    private TextView iconStyleChoice;
+    private TextView themeCycleChoice;
+    private TextView widgetSizeChoice;
+    private boolean glassIcons;
     private TextView animationsChoice;
     private TextView advancedChoice;
     private TextView followThemeChoice;
@@ -34,6 +41,7 @@ public final class LauncherSettingsActivity extends Activity {
         setContentView(R.layout.activity_launcher_settings);
         choices = getSharedPreferences(Config.SETTINGS_NAME, MODE_PRIVATE);
         Config config = Config.load(this);
+        glassIcons = config.glassIcons;
         columns = config.columns;
         rowsBelowDock = config.rowsBelowDock;
         animations = config.animations;
@@ -69,6 +77,26 @@ public final class LauncherSettingsActivity extends Activity {
             reverseRow(columnChoices);
             reverseRow(rowChoices);
         }
+        themeChoice = findViewById(R.id.themeChoice);
+        themeChoice.setOnClickListener(v -> showThemePicker());
+        themeCycleChoice = findViewById(R.id.themeCycleChoice);
+        themeCycleChoice.setOnClickListener(v -> {
+            ThemeCycle.setMinutes(this, ThemeCycle.next(ThemeCycle.minutes(this)));
+            refresh();
+        });
+        widgetSizeChoice = findViewById(R.id.widgetSizeChoice);
+        widgetSizeChoice.setOnClickListener(v -> {
+            WidgetScale.next(this);
+            setResult(RESULT_OK);
+            refresh();
+        });
+        iconStyleChoice = findViewById(R.id.iconStyleChoice);
+        iconStyleChoice.setOnClickListener(v -> {
+            glassIcons = !glassIcons;
+            choices.edit().putBoolean("glass_icons", glassIcons).apply();
+            setResult(RESULT_OK);
+            refresh();
+        });
         wallpaperChoice = findViewById(R.id.wallpaperChoice);
         wallpaperChoice.setOnClickListener(v -> showWallpaperPicker());
         animationsChoice = findViewById(R.id.animationsChoice);
@@ -114,12 +142,35 @@ public final class LauncherSettingsActivity extends Activity {
                 open(new Intent(Settings.ACTION_SETTINGS)));
         refresh();
         columnChoices[Math.max(0, Math.min(columns - 4, 3))].requestFocus();
+        if (getIntent().getBooleanExtra(PICK_THEME, false)) showThemePicker();
     }
 
     private void reverseRow(TextView[] views) {
         LinearLayout row = (LinearLayout) views[0].getParent();
         row.removeAllViews();
         for (int i = views.length - 1; i >= 0; i--) row.addView(views[i]);
+    }
+
+    private void showThemePicker() {
+        List<String> ids = ThemeSwitcher.ids(this);
+        String[] labels = new String[ids.size()];
+        for (int i = 0; i < labels.length; i++) labels[i] = ThemeSwitcher.label(this, ids.get(i));
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.theme_label)
+                .setSingleChoiceItems(labels, ids.indexOf(ThemeSwitcher.current(this)), (dialog, which) -> {
+                    dialog.dismiss();
+                    try {
+                        ThemeSwitcher.apply(this, ids.get(which));
+                        ThemeCycle.touch(this);
+                    } catch (java.io.IOException | org.json.JSONException e) {
+                        Toast.makeText(this, R.string.theme_failed, Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                    setResult(RESULT_OK);
+                    finish();   // Home restarts on the result and reads the new theme
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
     }
 
     private void showWallpaperPicker() {
@@ -186,6 +237,17 @@ public final class LauncherSettingsActivity extends Activity {
                 getString(advancedEffects ? R.string.on : R.string.off)));
         advancedChoice.setEnabled(animations);
         advancedChoice.setAlpha(animations ? 1f : 0.5f);
+        int size = WidgetScale.index(this);
+        widgetSizeChoice.setText(getString(R.string.widget_size_state, getString(
+                size == 0 ? R.string.size_small : size == 2 ? R.string.size_large : R.string.size_medium)));
+        int cycle = ThemeCycle.minutes(this);
+        themeCycleChoice.setText(getString(R.string.theme_cycle_state, getString(
+                cycle == 15 ? R.string.cycle_15 : cycle == 60 ? R.string.cycle_60 : cycle == 1440 ? R.string.cycle_1440 : R.string.cycle_off)));
+        iconStyleChoice.setText(getString(R.string.icon_style_state,
+                getString(glassIcons ? R.string.icons_glass : R.string.icons_original)));
+        String themeId = ThemeSwitcher.current(this);
+        themeChoice.setText(getString(R.string.theme_state,
+                themeId != null ? ThemeSwitcher.label(this, themeId) : getString(R.string.theme_custom)));
         String wallpaperCurrent = choices.getString(Config.WALLPAPER_CHOICE_KEY, null);
         wallpaperChoice.setText(getString(R.string.wallpaper_state,
                 "none".equals(wallpaperCurrent) ? getString(R.string.wallpaper_none)

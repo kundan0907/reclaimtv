@@ -1,0 +1,11 @@
+{
+  "theme": "aurora-light",
+  "theme_label": "Aurora \u00b7 Light",
+  "background_color": "#F1F3F8",
+  "wallpaper": true,
+  "wallpaper_dim": 0,
+  "race_calendar": [],
+  "light_mode": true,
+  "widget_accent": "#1FA896",
+  "ambient_glow": false
+}

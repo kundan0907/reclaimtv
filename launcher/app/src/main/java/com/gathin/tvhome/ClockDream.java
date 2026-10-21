@@ -18,6 +18,16 @@ public class ClockDream extends DreamService {
         setScreenBright(false);
         setContentView(R.layout.dream_clock);
         scene = new ClockScene(getWindow().getDecorView());
+        scene.setOnThemeChanged(this::rebuild);
+    }
+
+    /** A rotated theme is on: build the scene again from the new theme. */
+    private void rebuild() {
+        scene.stop();
+        setContentView(R.layout.dream_clock);
+        scene = new ClockScene(getWindow().getDecorView());
+        scene.setOnThemeChanged(this::rebuild);
+        scene.start();
     }
 
     @Override

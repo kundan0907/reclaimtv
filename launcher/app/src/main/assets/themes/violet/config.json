@@ -1,0 +1,11 @@
+{
+  "theme": "violet",
+  "theme_label": "Violet Aurora",
+  "background_color": "#0A0414",
+  "wallpaper": true,
+  "wallpaper_dim": 0,
+  "race_calendar": [],
+  "light_mode": false,
+  "widget_accent": "#C65BFF",
+  "ambient_glow": false
+}

@@ -1,0 +1,11 @@
+{
+  "theme": "rcb",
+  "theme_label": "RCB",
+  "background_color": "#080303",
+  "wallpaper": true,
+  "wallpaper_dim": 0,
+  "race_calendar": [],
+  "light_mode": false,
+  "widget_accent": "#E0252B",
+  "ambient_glow": false
+}

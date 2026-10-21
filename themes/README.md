@@ -10,7 +10,34 @@ A theme is a folder with a `config.json`. `scripts/apply-theme.sh` merges it wit
 | `aurora` | Navy background, names always shown, sky backdrop | 5 columns |
 | `compact` | Black, more apps on screen, stats line | 6 columns, two grid rows under the dock |
 
-Presets ship without wallpapers (v1). Colour comes from `background_color`. The launcher's accent colour is used only with its festival skin, so the presets do not set one.
+Presets ship without wallpapers (v1). The launcher APK must be built and installed for the keys below the first table to do anything (`docs/launcher.md`). Colour comes from `background_color`. The launcher's accent colour is used only with its festival skin, so the presets do not set one.
+
+## Bundled themes
+
+These are built into the launcher APK, each with its own wallpaper (credits: `launcher/THEME-CREDITS.md`). Choose one on the TV: gear > Theme. `scripts/launcher_options.py --theme <id>` copies a theme's colours and light mode into a `config.json`; it cannot set the wallpaper.
+
+| id | Name | Accent | Mode |
+|---|---|---|---|
+| `aurora` | Aurora | `#3FD0C0` | dark |
+| `aurora-light` | Aurora · Light | `#1FA896` | light |
+| `carbon` | Carbon | `#4DA3FF` | dark |
+| `daylight` | Daylight | `#5B8DEF` | light |
+| `gotham` | Gotham | `#A9B4C8` | dark |
+| `ironman-arc` | Iron Man · Arc reactor | `#35D6F5` | dark |
+| `mountains` | Mountains | `#8D99AE` | dark |
+| `mountains-light` | Mountains · Light | `#6B7A90` | light |
+| `northern` | Northern Lights | `#52E08A` | dark |
+| `panther-vibranium` | Black Panther · Vibranium | `#8A5CF5` | dark |
+| `rcb` | RCB | `#E0252B` | dark |
+| `rosso` | Rosso Corsa | `#E03A3A` | dark |
+| `rosso-light` | Rosso Corsa · Light | `#C9302C` | light |
+| `sunset` | Sunset | `#FF8A5B` | dark |
+| `synthwave` | Synthwave | `#FF4FD8` | dark |
+| `violet` | Violet Aurora | `#C65BFF` | dark |
+
+The presets above (`dark`, `batman`, `tesla`, `aurora`, `compact`) are separate overlay folders. `aurora` exists in both places; `launcher_options.py` uses the folder.
+
+Fan-art wallpapers (Iron Man, Black Panther) are not included. `ironman-arc` and `panther-vibranium` use generated artwork.
 
 ## Keys
 
@@ -35,6 +62,14 @@ Every key is optional. An unknown key or a wrong type is dropped with a warning,
 | `show_network_pill` | bool | Wi-Fi or Ethernet pill in the top bar |
 | `show_stats` | bool | One line with CPU, free memory and free storage |
 | `wallpaper` | bool | Must stay `false` in v1 |
+| `light_mode` | bool | Dark text on pale glass |
+| `widget_accent` | `#RRGGBB` | Colour of the widgets and glow |
+| `month_card` | bool | Calendar and days-left cards under the top icons |
+| `weather` | bool | Weather card and line (uses the internet) |
+| `widget_row` | bool | Widgets and recent apps in the last app row |
+| `dock_magnify` | bool | Dock magnification and glass dock |
+| `glass_icons` | bool | Glass app tiles |
+| `input_tiles` | list of `Label\|match` | HDMI console tiles; dock one with `input:Label` in `dock_apps` |
 
 The full list of keys lives in `scripts/theme_merge.py`. A key missing from it is dropped with a warning.
 
