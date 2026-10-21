@@ -17,6 +17,12 @@ Ask your assistant: "clean up my TV" or "set up IPTV on my TV". It asks a short 
 
 Nothing is uninstalled. The Play Store and Downloader are never touched (`lists/keep.txt`). See `docs/safety.md`.
 
+## Screenshots
+
+![Home screen on the author's TV: the dock, the top bar and no wallpaper](docs/screenshots/home-no-wallpaper.png)
+
+More screenshots and how to take your own: `docs/screenshots/README.md`.
+
 ## Quick start
 
 1. Install the skill (see `SKILL.md`): `~/.claude/skills/tv-cleanup` for Claude Code, or `~/.agents/skills/tv-cleanup` for Codex.
