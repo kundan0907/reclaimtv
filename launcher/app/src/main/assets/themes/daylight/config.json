@@ -1,0 +1,11 @@
+{
+  "theme": "daylight",
+  "theme_label": "Daylight",
+  "background_color": "#EEF1F6",
+  "wallpaper": true,
+  "wallpaper_dim": 0,
+  "race_calendar": [],
+  "light_mode": true,
+  "widget_accent": "#5B8DEF",
+  "ambient_glow": false
+}

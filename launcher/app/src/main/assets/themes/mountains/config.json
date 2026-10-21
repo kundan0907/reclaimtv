@@ -1,0 +1,11 @@
+{
+  "theme": "mountains",
+  "theme_label": "Mountains",
+  "background_color": "#0A0B0D",
+  "wallpaper": true,
+  "wallpaper_dim": 0,
+  "race_calendar": [],
+  "light_mode": false,
+  "widget_accent": "#8D99AE",
+  "ambient_glow": false
+}

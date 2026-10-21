@@ -16,6 +16,7 @@ BOOL_KEYS = {
     "library_button", "always_show_names", "wallpaper_true_color", "app_library", "shamsi_date",
     "module_cards", "reduced_motion", "animations", "advanced_effects", "show_home_settings_shortcut",
     "show_stats", "wallpaper", "settings_key_panel", "cinematic_home", "ambient_glow",
+    "month_card", "weather", "light_mode", "widget_row", "dock_magnify", "glass_icons",
 }
 INT_KEYS = {
     "columns", "rows_below_dock", "wifi_label_width", "sky_intensity", "wallpaper_rotation_minutes",
@@ -24,14 +25,16 @@ INT_KEYS = {
 STR_KEYS = {
     "live_tv_package", "live_tv_action", "source_panel_service", "source_panel_action", "input_action",
     "vpn_app", "festival", "festival_until", "greeting", "greeting_name", "accent_color",
-    "background_color", "wallpaper_order",
+    "background_color", "wallpaper_order", "widget_accent",
 }
 LIST_KEYS = {
     "dock_apps", "hidden_apps", "launch_actions", "app_labels", "app_banners", "settings_key_keycodes",
-    "input_key_keycodes", "app_keys", "race_calendar",
+    "input_key_keycodes", "app_keys", "race_calendar", "input_tiles",
 }
 HEX = re.compile(r"^#[0-9A-Fa-f]{6}$")
 PACKAGE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z0-9_]+)+$")
+# A console tile in the dock: "input:" and the tile's label (see input_tiles).
+INPUT_TILE = re.compile(r"^input:[^|:\n]{1,32}$")
 
 
 def _type_ok(key, value):
@@ -57,10 +60,14 @@ def merge(config, dock=None):
     if dock is not None:
         overlay["dock_apps"] = dock
     for key in ("dock_apps", "hidden_apps"):
-        if key in overlay and not all(isinstance(p, str) and PACKAGE.match(p) for p in overlay[key]):
+        ok = lambda p: isinstance(p, str) and (PACKAGE.match(p) or (key == "dock_apps" and INPUT_TILE.match(p)))
+        if key in overlay and not all(ok(p) for p in overlay[key]):
             raise ValueError(f"{key} must hold package names")
-    if "background_color" in overlay and not HEX.match(overlay["background_color"]):
-        raise ValueError("background_color must be #RRGGBB")
+    for key in ("background_color", "widget_accent"):
+        if key in overlay and not HEX.match(overlay[key]):
+            raise ValueError(f"{key} must be #RRGGBB")
+    if "input_tiles" in overlay and not all(isinstance(t, str) and t.strip() for t in overlay["input_tiles"]):
+        raise ValueError("input_tiles must hold text such as PlayStation|PlayStation")
     return overlay
 
 

@@ -1,0 +1,11 @@
+{
+  "theme": "synthwave",
+  "theme_label": "Synthwave",
+  "background_color": "#0A0418",
+  "wallpaper": true,
+  "wallpaper_dim": 0,
+  "race_calendar": [],
+  "light_mode": false,
+  "widget_accent": "#FF4FD8",
+  "ambient_glow": false
+}

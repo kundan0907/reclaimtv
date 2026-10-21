@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- owntv tile: dark field, soft glow, Phosphor "television-simple" fill glyph (MIT, see launcher/PHOSPHOR-LICENSE.txt). -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:width="320dp" android:height="180dp">
+        <shape android:shape="rectangle">
+            <gradient android:angle="315" android:startColor="#FF10304A" android:endColor="#FF060F1A" />
+        </shape>
+    </item>
+    <item android:width="150dp" android:height="150dp" android:gravity="center">
+        <shape android:shape="oval">
+            <gradient android:type="radial" android:gradientRadius="75dp"
+                android:startColor="#445AB0FF" android:endColor="#005AB0FF" />
+        </shape>
+    </item>
+    <item android:width="96dp" android:height="96dp" android:gravity="center"
+        android:drawable="@drawable/ic_glyph_owntv" />
+</layer-list>

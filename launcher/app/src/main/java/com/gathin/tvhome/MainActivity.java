@@ -10,6 +10,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
@@ -145,6 +147,22 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private View clockBlock;
     private View btnInputs;
     private TextView btnWifi;
+    /** The weather line and month card (config.xml, weather and month_card); null when off or this layout lacks them. */
+    private TextView weatherLine;
+    private MonthCardView monthCard;
+    private YearCardView yearCard;
+    /** Widget being moved with the arrow keys (Settings menu, Move widgets): 0 calendar, 1 weather, -1 not moving. */
+    private int moveTarget = -1;
+    /** The calendar and days-left widgets are showing, so they take focus (they hide when the dock scrolls up). */
+    private boolean widgetsShown;
+    /** Light mode (config.xml, light_mode): dark ink and pale glass for a light background. */
+    private boolean light;
+    private boolean widgetRow;
+    private boolean dockMagnify;
+    private DockMagnifier magnifier;
+    private DockDecoration dockDecoration;
+    private boolean dockHidden;
+    private int widgetAccent;
     /** The network pill's icon as last set, so a refresh that changes nothing does not lay the top bar out again. */
     private int wifiIcon;
     /** The pills have been filled in once; later resumes refresh them after the first frame. */
@@ -291,6 +309,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         public void run() {
             updateGreeting();
             updateRace();
+            updateWeatherAndMonth();
             updateWifiLabel();
             sky.update();
             wallpaperPlayer.update();
@@ -346,9 +365,14 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         heroMeta = findViewById(R.id.heroMeta);
         heroDots = findViewById(R.id.heroDots);
         heroArt = findViewById(R.id.heroArt);
+        light = cfg.lightMode;
+        widgetRow = cfg.widgetRow;
+        dockMagnify = cfg.dockMagnify && cfg.animations && cfg.dockRow;
+        widgetAccent = cfg.widgetAccent;
         cinematic = cfg.cinematicHome;
         if (cinematic) setUpCinematicShelf();
-        if (cfg.wallpaperEnabled && !cfg.wallpapers.isEmpty()) heroArt.setVisibility(View.GONE);
+        // App changes light only the focused tile; the theme background stays still.
+        heroArt.setVisibility(View.GONE);
         // dock_title false: the name above the dock (and the cinematic lines under it) never shows; the glow
         // still follows the dock.
         if (!cfg.dockTitle) hero.setVisibility(View.GONE);
@@ -375,6 +399,41 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         vpnApp = cfg.vpnApp;
         moduleCards = cfg.moduleCards;
         hiddenApps = new HashSet<>(cfg.hiddenApps);
+        weatherLine = cfg.weather ? findViewById(R.id.weatherLine) : null;
+        // The calendar and year cards stay under the icons whenever the dock is in view; the widget row repeats them below.
+        monthCard = cfg.monthCard ? findViewById(R.id.monthCard) : null;
+        yearCard = cfg.monthCard ? findViewById(R.id.yearCard) : null;
+        if (monthCard != null) {
+            monthCard.setVisibility(View.VISIBLE);
+            monthCard.setAccent(cfg.widgetAccent);
+            monthCard.setWeekly(getSharedPreferences("widgets", MODE_PRIVATE).getBoolean("calWeekly", true));
+            monthCard.setOnClickListener(v -> showMonthDialog());
+            monthCard.setOnKeyListener(widgetKeys);
+        }
+        if (yearCard != null) {
+            yearCard.setVisibility(View.VISIBLE);
+            yearCard.setAccent(cfg.widgetAccent);
+            yearCard.setOnClickListener(v -> showYearDialog());
+            yearCard.setOnKeyListener(widgetKeys);
+        }
+        SharedPreferences spots = getSharedPreferences("widgets", MODE_PRIVATE);
+        if (monthCard != null) {
+            monthCard.setTranslationX(spots.getInt("monthPosX", 0) * density);
+            monthCard.setTranslationY(spots.getInt("monthPosY", 0) * density);
+        }
+        if (yearCard != null) {
+            yearCard.setTranslationX(spots.getInt("yearPosX", 0) * density);
+            yearCard.setTranslationY(spots.getInt("yearPosY", 0) * density);
+        }
+        float widgetScale = WidgetScale.factor(this);
+        WidgetScale.apply(monthCard, widgetScale);
+        WidgetScale.apply(yearCard, widgetScale);
+        if (weatherLine != null) weatherLine.setTextSize(14 * widgetScale);
+        if (monthCard != null || yearCard != null) setMonthCardShown(false);
+        if (weatherLine != null) {
+            weatherLine.setTranslationX(spots.getInt("wxX", 0) * density);
+            weatherLine.setTranslationY(spots.getInt("wxY", 0) * density);
+        }
 
         grid = findViewById(R.id.grid);
         rtlAppGrid = getResources().getBoolean(R.bool.rtl_app_grid);
@@ -432,7 +491,12 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             public void onChildViewDetachedFromWindow(@NonNull View v) {
             }
         });
-        if (dockRow) grid.addItemDecoration(new DockDecoration(COLUMNS, density, cinematic, cfg.alwaysShowNames));
+        if (dockRow) {
+            dockDecoration = new DockDecoration(COLUMNS, density, cinematic, cfg.alwaysShowNames,
+                    cfg.lightMode, cfg.glassIcons || cfg.dockMagnify, cfg.widgetAccent);
+            grid.addItemDecoration(dockDecoration);
+            if (dockMagnify) watchDockFocus();
+        }
         if (animations) {
             int enterAnim = reducedMotion ? R.anim.tile_enter_reduced : R.anim.tile_enter;
             float enterDelay = reducedMotion ? 0f : 0.06f;
@@ -517,7 +581,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             open(systemIntent(Settings.ACTION_WIFI_SETTINGS));
             return true;
         });
-        btnSettings.setOnClickListener(v -> open(systemIntent(Settings.ACTION_SETTINGS)));
+        btnSettings.setOnClickListener(v -> showSettingsMenu());   // the menu lists TV settings too
         btnReorder = findViewById(R.id.btnReorder);
         btnReorder.setOnClickListener(v -> toggleReorder());
         btnReorder.setVisibility(cfg.reorderButton ? View.VISIBLE : View.GONE);
@@ -534,6 +598,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             if (cfg.wifiLabelWidth > 0) btnWifi.setMaxWidth(Math.round(cfg.wifiLabelWidth * density));
             else makeIconOnly(btnWifi);
             makeIconOnly((TextView) btnSettings);
+            makeIconOnly((TextView) btnInputs);
         }
         btnSettings.setOnLongClickListener(v -> {
             showSettingsMenu();
@@ -547,8 +612,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             if (event.getAction() != KeyEvent.ACTION_DOWN) return false;
             if (keyCode == KeyEvent.KEYCODE_DPAD_UP) return true;
             if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
-                // Back to the dock tile Up came from, not wherever the focus finder lands.
-                focusTile(lastFocused % COLUMNS);
+                // The widgets under the buttons when they show, else back to the dock tile Up came from.
+                View widget = widgetsShown ? (monthCard != null ? monthCard : yearCard) : null;
+                if (widget != null) widget.requestFocus();
+                else focusTile(lastFocused % COLUMNS);
                 return true;
             }
             int firstButton = btnInputs.getVisibility() == View.VISIBLE ? R.id.btnInputs : firstTopButton().getId();
@@ -569,6 +636,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                         .setDuration(160).start());
             }
         }
+        if (light) applyLightMode();
+        applyPillPalette();
         if (festive) applyFestiveSkin((TextView) btnInputs, (TextView) btnSettings);
 
         // Hide the glass when focus leaves the tiles.
@@ -649,6 +718,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             recreate();
             return;
         }
+        if (ThemeCycle.advanceIfDue(this)) {   // theme rotation: a new theme is due since Home was last in front
+            recreate();
+            return;
+        }
         restartIdleClock();
         promptsPaused = false;
         if (grid.getAdapter() == null) grid.setAdapter(adapter);   // dropped by onTrimMemory
@@ -659,6 +732,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         rebuildOnResume = false;
         updateGreeting();
         updateRace();
+        updateWeatherAndMonth();
         // The network and Inputs pills keep their state while Home is in the background, and callbacks update them
         // when the network or the inputs change, so this refresh only catches anything missed. Its binder calls
         // (about 7 ms on a TCL C755, most of it WifiManager.getConnectionInfo) would hold up the first frame back
@@ -890,6 +964,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
      */
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
+        if (moveTarget >= 0) return dispatchWidgetKey(event);
         if (handleSettingsKey(event)) return true;
         if (!reordering) return super.dispatchKeyEvent(event);
         if (dockEditing) return dispatchDockEdit(event);
@@ -1172,6 +1247,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     public void onTileFocused(int position, View card) {
         lastFocused = position;
         lastFocusedKey = adapter.keyAt(position);
+        ImageView tileArt = card.findViewById(R.id.banner);
+        glass.setVisibility(tileArt != null && tileArt.getDrawable() instanceof AppIcon ? View.INVISIBLE : View.VISIBLE);
         // Focus restored before the first layout (cold start): the tile has no size yet, and the glass
         // would be sized to 2*pad. Run again once the tile is laid out.
         if (card.getWidth() == 0) {
@@ -1184,8 +1261,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         Rect r = tileRect;
         r.set(0, 0, card.getWidth(), card.getHeight());
         root.offsetDescendantRectToMyCoords(card, r);
-        float pad = 6f * density;        // matches GlassView's glow inset
-        float scale = adapter.focusScale();
+        float pad = GlassView.PAD_DP * density;        // matches GlassView's glow inset
+        float scale = adapter.focusScaleAt(position);
         float w = card.getWidth() * scale + 2 * pad;
         float h = card.getHeight() * scale + 2 * pad;
         float x = r.exactCenterX() - w / 2f;
@@ -1203,8 +1280,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         glassTargetX = x;
         glassTargetY = y;
         // Cinematic shelf: the highlight glows in the dock app's colour, plain white in the grid.
-        int accent = cinematic && !festive && position < COLUMNS ? adapter.ambientColorAt(position) : 0;
-        if (cinematic && !festive && accent != glassAccent) {
+        // The dock's own light (DockMagnifier) replaces the halo there; elsewhere the halo takes the app's colour.
+        glass.setSuppressed(dockMagnify && position < COLUMNS);
+        int accent = !festive ? adapter.ambientColorAt(position) : 0;
+        if (!festive && accent != glassAccent) {
             glassAccent = accent;
             glass.setAccent(accent);
         }
@@ -1238,10 +1317,12 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                 else grid.smoothScrollBy(0, dy);
             }
             showHero(position, scroll ? r.top - dy : r.top);
+            magnifyDock(position);
         } else {
             // Below the dock (or in a plain grid) the glow follows the tile without the big name; letting it
             // fade out left the grid on plain black.
             showGlowOnly(position);
+            magnifyDock(-1);
             // Scroll just enough so the whole glass (not only the tile) is visible.
             revealRect.set(0, -(int) pad * 2, item.getWidth(), item.getHeight() + (int) pad);
             grid.requestChildRectangleOnScreen(item, revealRect, reducedMotion);
@@ -1255,8 +1336,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         RecyclerView.ViewHolder vh = grid.findViewHolderForAdapterPosition(pos);
         View card = vh == null ? null : vh.itemView.findViewById(R.id.card);
         if (card == null || card.getWidth() <= 0 || !card.isFocused()) return;
-        float pad = 6f * density;
-        float scale = adapter.focusScale();
+        float pad = GlassView.PAD_DP * density;
+        float scale = adapter.focusScaleAt(pos);
         int w = (int) (card.getWidth() * scale + 2 * pad);
         int h = (int) (card.getHeight() * scale + 2 * pad);
         if (!glassShown || card.getWidth() != glassCardW || glass.getWidth() != w || glass.getHeight() != h) {
@@ -1267,6 +1348,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     // ---- top shelf -------------------------------------------------------------------------------
 
     private void showHero(int position, float dockTopInRoot) {
+        setMonthCardShown(true);
         String label = adapter.labelAt(position);
         int color = adapter.ambientColorAt(position);
         float y = dockTopInRoot - 14 * density - 26 * density - hero.getHeight();
@@ -1357,6 +1439,15 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
      * Darkens the side the shelf's text is on and the lower part of the screen, so the name, the dock and
      * the grid stay readable over the artwork. One small bitmap stretched over the screen, like the glow.
      */
+    private int scrimRgb() {
+        return light ? 0xF2F4F8 : 0x060406;
+    }
+
+    /** Ink for text on the current background: white normally, near-black in light mode, at the given alpha. */
+    private int ink(int alpha) {
+        return (alpha << 24) | (light ? 0x14171C : 0xFFFFFF);
+    }
+
     private Drawable scrimDrawable() {
         int w = 480, h = 270;
         Bitmap bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
@@ -1364,10 +1455,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         boolean rtl = getResources().getBoolean(R.bool.rtl_menu_bar);
         Paint paint = new Paint();
         paint.setShader(new LinearGradient(rtl ? w : 0, 0, rtl ? 0 : w, 0,
-                new int[]{0xD1060406, 0x59060406, 0x00060406}, new float[]{0f, 0.42f, 0.7f}, Shader.TileMode.CLAMP));
+                new int[]{0xD1000000 | scrimRgb(), 0x59000000 | scrimRgb(), scrimRgb()}, new float[]{0f, 0.42f, 0.7f}, Shader.TileMode.CLAMP));
         canvas.drawRect(0, 0, w, h, paint);
         paint.setShader(new LinearGradient(0, 0, 0, h,
-                new int[]{0x00060406, 0x00060406, 0xDB060406, 0xFF060406}, new float[]{0f, 0.28f, 0.58f, 0.76f},
+                new int[]{scrimRgb(), scrimRgb(), 0xDB000000 | scrimRgb(), 0xFF000000 | scrimRgb()}, new float[]{0f, 0.28f, 0.58f, 0.76f},
                 Shader.TileMode.CLAMP));
         canvas.drawRect(0, 0, w, h, paint);
         BitmapDrawable scrim = new BitmapDrawable(getResources(), bmp);
@@ -1419,7 +1510,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         String text = getString(R.string.last_opened, rel);
         SpannableString line = new SpannableString(text);
         int at = text.indexOf(rel);
-        if (at >= 0) line.setSpan(new ForegroundColorSpan(0xFFFFFFFF), at, at + rel.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        if (at >= 0) line.setSpan(new ForegroundColorSpan(ink(0xFF)), at, at + rel.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         heroMeta.setText(line);
         heroMeta.setVisibility(View.VISIBLE);
     }
@@ -1443,7 +1534,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         for (int i = 0; i < count; i++) {
             View dot = heroDots.getChildAt(rtlAppGrid ? count - 1 - i : i);
             boolean on = i == position;
-            ((GradientDrawable) dot.getBackground()).setColor(on ? 0xFFFFFFFF : 0x4DFFFFFF);
+            ((GradientDrawable) dot.getBackground()).setColor(on ? ink(0xFF) : ink(0x4D));
             ViewGroup.LayoutParams lp = dot.getLayoutParams();
             int w = (int) ((on ? 20 : 6) * density);
             if (lp.width != w) {
@@ -1476,7 +1567,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                 boolean rtl = getResources().getBoolean(R.bool.rtl_menu_bar);
                 paint.setShader(new RadialGradient(
                         w * (rtl ? 0.20f : 0.80f), h * 0.06f, w * 0.78f,
-                        new int[]{0xA6FFFFFF, 0x47FFFFFF, 0x00FFFFFF},
+                        new int[]{0x70FFFFFF, 0x28FFFFFF, 0x00FFFFFF},
                         new float[]{0f, 0.5f, 1f},
                         Shader.TileMode.CLAMP));
             } else {
@@ -1522,6 +1613,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
      * name above the dock does not show (every grid tile has its name underneath).
      */
     private void showGlowOnly(int position) {
+        setMonthCardShown(false);
         int color = adapter.ambientColorAt(position);
         stopAmbientAnimation();
         hero.animate().cancel();
@@ -1804,6 +1896,150 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         return findViewById(R.id.btnSettings);
     }
 
+    @Override
+    public void onTileBlurred() {
+        if (!dockMagnify) return;
+        // Focus moved to another tile (which settles the dock itself) or out of the grid, e.g. to the top bar.
+        handler.post(() -> {
+            View focused = getCurrentFocus();
+            RecyclerView.ViewHolder vh = focused == null ? null : grid.findContainingViewHolder(focused);
+            if (vh == null || vh.getBindingAdapterPosition() >= COLUMNS) magnifyDock(-1);
+        });
+    }
+
+    /**
+     * Dock magnification: the tile in focus grows, its neighbours grow less with distance. The dock cells have room
+     * for it without moving anything (the focused tile and its neighbour together take about the gap between tiles),
+     * so only the scale changes. -1 puts every dock tile back to its size. Names move down with their tile's growth.
+     */
+    /**
+     * The dock tucks away under the bottom edge while focus is on the top bar or a widget, and rises when focus
+     * comes back to the grid, so the wallpaper stays clean when you are not choosing an app.
+     */
+    private void watchDockFocus() {
+        root.getViewTreeObserver().addOnGlobalFocusChangeListener((oldFocus, newFocus) -> {
+            if (newFocus == null || moveTarget >= 0) return;
+            boolean inGrid = grid.findContainingViewHolder(newFocus) != null;
+            int id = newFocus.getId();
+            boolean away = !inGrid && (newFocus == monthCard || newFocus == yearCard || id == R.id.btnInputs
+                    || id == R.id.btnWifi || id == R.id.btnReorder || id == R.id.btnLibraryTop || id == R.id.btnSettings);
+            if (away) setDockHidden(true);
+            else if (inGrid) setDockHidden(false);
+        });
+    }
+
+    private void setDockHidden(boolean hide) {
+        if (dockHidden == hide || grid.getHeight() == 0) return;
+        dockHidden = hide;
+        grid.animate().cancel();
+        if (hide) {
+            magnifyDock(-1);
+            hero.animate().cancel();
+            hero.setAlpha(0f);
+            heroShown = false;
+            heroArt.animate().cancel();
+            heroArt.setAlpha(0f);
+            glass.setAlpha(0f);
+            glassShown = false;
+            // Only a thin lip of glass stays above the bottom edge, so the screen is not left bare.
+            setMonthCardShown(true);
+            grid.animate().translationY(107 * density).alpha(0.92f).setDuration(380)
+                    .setInterpolator(new android.view.animation.AccelerateInterpolator(1.3f)).start();
+        } else {
+            grid.animate().translationY(0f).alpha(1f).setDuration(420)
+                    .setInterpolator(new android.view.animation.PathInterpolator(0.2f, 0.9f, 0.3f, 1f)).start();
+        }
+    }
+
+    private void magnifyDock(int focused) {
+        if (magnifier == null && dockMagnify && dockDecoration != null && adapter != null) {
+            magnifier = new DockMagnifier(grid, adapter, dockDecoration, COLUMNS, density, reducedMotion);
+        }
+        if (magnifier != null) magnifier.focus(focused);
+    }
+
+    @Override
+    public void onInputTile(String inputId) {
+        openInput(inputId);
+    }
+
+    @Override
+    public void onWidget(int type) {
+        if (type == AppAdapter.WIDGET_CALENDAR) {
+            showMonthDialog();
+        } else if (type == AppAdapter.WIDGET_YEAR) {
+            showYearDialog();
+        } else {
+            Toast.makeText(this, R.string.widget_weather_updating, Toast.LENGTH_SHORT).show();
+            Weather.refreshNow(this, (tempF, code) -> { });
+            handler.postDelayed(this::updateWeatherAndMonth, 4000);
+        }
+    }
+
+    /** The year's dots, big, over a dimmed Home; OK or Back closes it. */
+    private void showYearDialog() {
+        android.app.Dialog dialog = new android.app.Dialog(this, android.R.style.Theme_Translucent_NoTitleBar);
+        YearCardView card = new YearCardView(this, null);
+        card.setLight(light);
+        card.setSolid(true);
+        card.setBig(true);
+        card.setAccent(widgetAccent);
+        android.widget.FrameLayout frame = new android.widget.FrameLayout(this);
+        frame.setBackgroundColor(0xB0000000);
+        frame.addView(card, new android.widget.FrameLayout.LayoutParams(Math.round(540 * density), Math.round(360 * density),
+                Gravity.CENTER));
+        frame.setOnClickListener(v -> dialog.dismiss());
+        dialog.setOnKeyListener((dlg, code, event) -> {
+            if (event.getAction() == KeyEvent.ACTION_DOWN
+                    && (code == KeyEvent.KEYCODE_DPAD_CENTER || code == KeyEvent.KEYCODE_ENTER)) {
+                dlg.dismiss();
+                return true;
+            }
+            return false;
+        });
+        dialog.setContentView(frame);
+        dialog.show();
+    }
+
+    /** The calendar with its Weekly / Monthly toggle, big, over a dimmed Home; OK or Back closes it. */
+    private void showMonthDialog() {
+        android.app.Dialog dialog = new android.app.Dialog(this, android.R.style.Theme_Translucent_NoTitleBar);
+        SharedPreferences spots = getSharedPreferences("widgets", MODE_PRIVATE);
+        MonthCardView card = new MonthCardView(this, null);
+        card.setLight(light);
+        card.setSolid(true);
+        card.setAccent(widgetAccent);
+        card.setShowToggle(true);
+        card.setWeekly(spots.getBoolean("calWeekly", true));
+        android.widget.FrameLayout frame = new android.widget.FrameLayout(this);
+        frame.setBackgroundColor(0xB0000000);
+        frame.addView(card, new android.widget.FrameLayout.LayoutParams(Math.round(540 * density), Math.round(440 * density),
+                Gravity.CENTER));
+        frame.setOnClickListener(v -> dialog.dismiss());
+        // Left/Right (or Up/Down) pick Weekly or Monthly and the choice is kept; OK or Back closes.
+        dialog.setOnKeyListener((dlg, code, event) -> {
+            if (event.getAction() != KeyEvent.ACTION_DOWN) return false;
+            boolean left = code == KeyEvent.KEYCODE_DPAD_LEFT || code == KeyEvent.KEYCODE_DPAD_UP;
+            boolean right = code == KeyEvent.KEYCODE_DPAD_RIGHT || code == KeyEvent.KEYCODE_DPAD_DOWN;
+            if (left || right) {
+                card.setWeekly(left);
+                spots.edit().putBoolean("calWeekly", left).apply();
+                return true;
+            }
+            if (code == KeyEvent.KEYCODE_DPAD_CENTER || code == KeyEvent.KEYCODE_ENTER) {
+                dlg.dismiss();
+                return true;
+            }
+            return false;
+        });
+        dialog.setOnDismissListener(dlg -> {
+            if (monthCard != null) monthCard.setWeekly(spots.getBoolean("calWeekly", true));
+            adapter.refreshWidgetArt();   // the calendar tile follows the mode just chosen
+        });
+        dialog.setContentView(frame);
+        dialog.show();
+    }
+
     @Override public void onLibraryUp() {
         if (adapter.appCount() == 0) { firstTopButton().requestFocus(); return; }
         int lastRow = ((adapter.appCount() - 1) / COLUMNS) * COLUMNS;
@@ -1913,6 +2149,191 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             handler.postDelayed(clockCheck, 1_000L);
         }
     }
+
+    /** Move widgets: the arrows move the picked widget, OK picks the other one, Back saves the places. */
+    private void startWidgetMove() {
+        moveTarget = 0;
+        setMonthCardShown(true);
+        markPicked();
+        Toast.makeText(this, R.string.widgets_move_help, Toast.LENGTH_LONG).show();
+    }
+
+    /** Dark ink, pale pills and a dark glass ring: everything the layout paints white. */
+    private void applyLightMode() {
+        int[] texts = {R.id.clock, R.id.ampm, R.id.date, R.id.shamsiDate, R.id.stats, R.id.weatherLine, R.id.heroName, R.id.heroMeta};
+        int[] alphas = {0xFF, 0xBF, 0xA6, 0xE6, 0xD9, 0xE6, 0xFF, 0xB3};
+        for (int i = 0; i < texts.length; i++) {
+            TextView t = findViewById(texts[i]);
+            if (t != null) t.setTextColor(ink(alphas[i]));
+        }
+        View divider = findViewById(R.id.clockDivider);
+        if (divider != null) divider.setBackgroundColor(ink(0x33));
+        greetingColor = ink(0x8C);
+        greeting.setTextColor(greetingColor);
+        glass.setLight(true);
+        if (monthCard != null) monthCard.setLight(true);
+        if (yearCard != null) yearCard.setLight(true);
+    }
+
+    /** All top controls use the same theme material and a high-contrast focus state. */
+    private void applyPillPalette() {
+        int accent = Tint.accent(widgetAccent);
+        int focus = Tint.mix(accent, light ? 0xFFFFFFFF : 0xFF000000, light ? 0.70f : 0.30f);
+        int restingInk = Tint.mix(accent, light ? 0xFF14171C : 0xFFFFFFFF, light ? 0.40f : 0.58f);
+        int[][] states = {{android.R.attr.state_focused}, {android.R.attr.state_activated}, {}};
+        ColorStateList ink = new ColorStateList(states, new int[]{Tint.on(focus), Tint.on(focus), restingInk});
+        for (View v : new View[]{btnInputs, btnWifi, btnReorder, btnLibraryTop, findViewById(R.id.btnSettings)}) {
+            android.graphics.drawable.StateListDrawable bg = new android.graphics.drawable.StateListDrawable();
+            bg.addState(states[0], pillShape(focus, Tint.mix(accent, 0xFFFFFFFF, 0.65f)));
+            bg.addState(states[1], pillShape(focus, accent));
+            bg.addState(states[2], glassPill(accent));
+            TextView t = (TextView) v;
+            t.setBackground(bg);
+            t.setTextColor(ink);
+            t.setCompoundDrawableTintList(ink);
+        }
+    }
+
+    /** The resting pill: the widgets' glass (theme-tinted translucent fill, lit rim), so the top bar matches them. */
+    private android.graphics.drawable.Drawable glassPill(int accent) {
+        int top = light ? Tint.mix(0xFFFFFFFF, accent, 0.10f) : Tint.mix(0xFF20242C, accent, 0.22f);
+        int bottom = light ? Tint.mix(0xFFF4F7FB, accent, 0.14f) : Tint.mix(0xFF101216, accent, 0.16f);
+        GradientDrawable fill = new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, new int[]{
+                Tint.withAlpha(top, light ? 0xC8 : 0x84), Tint.withAlpha(bottom, light ? 0x90 : 0x66)});
+        fill.setCornerRadius(100 * density);
+        GradientDrawable rim = new GradientDrawable();
+        rim.setCornerRadius(100 * density);
+        rim.setStroke(Math.max(1, Math.round(1.2f * density)), light ? 0x33000000 : 0x55FFFFFF);
+        return new android.graphics.drawable.LayerDrawable(new android.graphics.drawable.Drawable[]{fill, rim});
+    }
+
+    private GradientDrawable pillShape(int fill, int edge) {
+        GradientDrawable d = new GradientDrawable();
+        d.setColor(fill);
+        d.setCornerRadius(100 * density);
+        d.setStroke(Math.max(1, Math.round(density)), edge);
+        return d;
+    }
+
+    /** Puts the calendar and the weather line back where the layout places them. */
+    private void resetWidgets() {
+        getSharedPreferences("widgets", MODE_PRIVATE).edit().clear().apply();
+        for (View v : movables()) {
+            v.setTranslationX(0f);
+            v.setTranslationY(0f);
+        }
+    }
+
+    /** The widgets that exist, in the order OK steps through them while moving. */
+    private View[] movables() {
+        java.util.List<View> list = new java.util.ArrayList<>();
+        if (monthCard != null) list.add(monthCard);
+        if (yearCard != null) list.add(yearCard);
+        if (weatherLine != null) list.add(weatherLine);
+        return list.toArray(new View[0]);
+    }
+
+    private void markPicked() {
+        View[] all = movables();
+        View picked = moveTarget >= 0 && moveTarget < all.length ? all[moveTarget] : null;
+        if (monthCard != null) monthCard.setPicked(monthCard == picked);
+        if (yearCard != null) yearCard.setPicked(yearCard == picked);
+        if (weatherLine != null) {
+            weatherLine.setBackgroundResource(weatherLine == picked ? R.drawable.pill_bg : 0);
+            weatherLine.setPadding(weatherLine == picked ? (int) (12 * density) : 0, 0, 0, 0);
+        }
+    }
+
+    private void endWidgetMove() {
+        moveTarget = -1;
+        markPicked();
+        SharedPreferences.Editor spots = getSharedPreferences("widgets", MODE_PRIVATE).edit();
+        if (monthCard != null) spots.putInt("monthPosX", Math.round(monthCard.getTranslationX() / density))
+                .putInt("monthPosY", Math.round(monthCard.getTranslationY() / density));
+        if (yearCard != null) spots.putInt("yearPosX", Math.round(yearCard.getTranslationX() / density))
+                .putInt("yearPosY", Math.round(yearCard.getTranslationY() / density));
+        if (weatherLine != null) spots.putInt("wxX", Math.round(weatherLine.getTranslationX() / density))
+                .putInt("wxY", Math.round(weatherLine.getTranslationY() / density));
+        spots.apply();
+    }
+
+    /** Moves a widget by a step, keeping it on the screen. */
+    private void nudge(View v, float dx, float dy) {
+        float tx = v.getTranslationX(), ty = v.getTranslationY();
+        v.setTranslationX(tx + dx);
+        v.setTranslationY(ty + dy);
+        int[] at = new int[2];
+        v.getLocationInWindow(at);
+        if (at[0] < 0 || at[0] + v.getWidth() > root.getWidth()) v.setTranslationX(tx);
+        if (at[1] < 0 || at[1] + v.getHeight() > root.getHeight()) v.setTranslationY(ty);
+    }
+
+    private boolean dispatchWidgetKey(KeyEvent event) {
+        View[] all = movables();
+        View v = all[Math.min(moveTarget, all.length - 1)];
+        float step = (event.getRepeatCount() > 4 ? 40 : 12) * density;
+        int code = event.getKeyCode();
+        if (event.getAction() == KeyEvent.ACTION_DOWN) {
+            if (code == KeyEvent.KEYCODE_DPAD_LEFT) nudge(v, -step, 0);
+            else if (code == KeyEvent.KEYCODE_DPAD_RIGHT) nudge(v, step, 0);
+            else if (code == KeyEvent.KEYCODE_DPAD_UP) nudge(v, 0, -step);
+            else if (code == KeyEvent.KEYCODE_DPAD_DOWN) nudge(v, 0, step);
+        } else if (event.getAction() == KeyEvent.ACTION_UP) {
+            if (code == KeyEvent.KEYCODE_BACK) endWidgetMove();
+            else if ((code == KeyEvent.KEYCODE_DPAD_CENTER || code == KeyEvent.KEYCODE_ENTER) && all.length > 1) {
+                moveTarget = (moveTarget + 1) % all.length;
+                markPicked();
+            }
+        }
+        return true;
+    }
+
+    private void updateWeatherAndMonth() {
+        if (adapter != null) adapter.refreshWidgetArt();
+        if (monthCard != null) monthCard.refresh();
+        if (yearCard != null) yearCard.refresh();
+        if (weatherLine == null && !widgetRow) return;
+        Weather.refresh(this, (tempF, code) -> {
+            if (isDestroyed()) return;
+            adapter.setWeather(Weather.last(this));
+            if (weatherLine == null) return;
+            weatherLine.setCompoundDrawablesRelativeWithIntrinsicBounds(Weather.icon(code), 0, 0, 0);
+            if (light) weatherLine.setCompoundDrawableTintList(ColorStateList.valueOf(Weather.icon(code) == R.drawable.ic_wx_sun ? 0xFFD18A00 : 0xFF2A3346));
+            weatherLine.setText(Weather.line(tempF, code));
+            weatherLine.setVisibility(View.VISIBLE);
+        });
+    }
+
+    /** The month card follows the dock's top shelf: it hides when the dock scrolls up to make room for more rows. */
+    private void setMonthCardShown(boolean shown) {
+        for (View v : new View[]{monthCard, yearCard}) {
+            if (v == null) continue;
+            v.animate().cancel();
+            if (animations && !reducedMotion) v.animate().alpha(shown ? 1f : 0f).setDuration(200).start();
+            else v.setAlpha(shown ? 1f : 0f);
+            // Hidden widgets take no focus, so Down from the top bar goes straight to the grid.
+            v.setFocusable(shown);
+            v.setClickable(shown);
+        }
+        widgetsShown = shown;
+    }
+
+    /** Up and Down walk gear, calendar, days left, dock; Left and Right stay on the widget. */
+    private final View.OnKeyListener widgetKeys = (v, code, event) -> {
+        if (event.getAction() != KeyEvent.ACTION_DOWN) return false;
+        android.util.Log.d("TvHomeW", "key " + code + " on " + (v == monthCard ? "calendar" : "year") + " cal.focusable=" + (monthCard != null && monthCard.isFocusable()) + " shown=" + widgetsShown);
+        if (code == KeyEvent.KEYCODE_DPAD_UP) {
+            View up = v == monthCard || monthCard == null ? findViewById(R.id.btnSettings) : monthCard;
+            up.requestFocus();
+            return true;
+        }
+        if (code == KeyEvent.KEYCODE_DPAD_DOWN) {
+            if (v == monthCard && yearCard != null) yearCard.requestFocus();
+            else focusTile(lastFocused % COLUMNS);
+            return true;
+        }
+        return code == KeyEvent.KEYCODE_DPAD_LEFT || code == KeyEvent.KEYCODE_DPAD_RIGHT;
+    };
 
     private void updateGreeting() {
         int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
@@ -2467,11 +2888,19 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         View panel = getLayoutInflater().inflate(R.layout.popup_inputs, root, false);
         LinearLayout rows = panel.findViewById(R.id.rows);
         PopupWindow popup = glassPopup(panel, (int) (200 * density));
+        addSettingsMenuRow(rows, popup, R.string.theme_label, () -> startActivityForResult(
+                new Intent(this, LauncherSettingsActivity.class).putExtra(LauncherSettingsActivity.PICK_THEME, true),
+                LAUNCHER_SETTINGS_REQUEST));
         addSettingsMenuRow(rows, popup, R.string.launcher_settings, () -> startActivityForResult(
                 new Intent(this, LauncherSettingsActivity.class), LAUNCHER_SETTINGS_REQUEST));
         if (moduleCards) addSettingsMenuRow(rows, popup, R.string.module_cards, this::showModuleCards);
         if (dockRow) addSettingsMenuRow(rows, popup, R.string.dock_edit, this::startDockEdit);
+        if (monthCard != null || yearCard != null || weatherLine != null) {
+            addSettingsMenuRow(rows, popup, R.string.widgets_move, this::startWidgetMove);
+            addSettingsMenuRow(rows, popup, R.string.widgets_reset, this::resetWidgets);
+        }
         addSettingsMenuRow(rows, popup, R.string.reorder, this::toggleReorder);
+        addSettingsMenuRow(rows, popup, R.string.tv_settings, () -> open(systemIntent(Settings.ACTION_SETTINGS)));
         panel.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
         popup.setWidth(Math.max((int) (200 * density), panel.getMeasuredWidth()));
         // Hebrew puts Settings at the left of the header: grow the menu inward from it.

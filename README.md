@@ -15,13 +15,26 @@ What changed on the TV:
 - Google TV's extra apps and TV-maker promotions are disabled, not uninstalled (`lists/`). The Play Store and Downloader are never touched.
 - Animations are shorter (`scripts/speed.sh`). Every change has an undo: `scripts/revert.sh`.
 
+## The launcher
+
+The launcher in `launcher/` has a glass look and a few optional widgets. Everything is off until you choose it. You build and install the APK once (`docs/launcher.md`).
+
+- 16 themes with wallpapers, including light versions, and optional theme rotation.
+- Glass app tiles and a glass dock with magnification.
+- Calendar (weekly or monthly), days-left-in-year and weather cards.
+- A widget row with a continue-watching tile.
+- Screensaver widgets, and a widget size setting.
+- A PlayStation, Xbox or Switch tile when one is on HDMI.
+
+Weather and the continue-watching picture use the internet, so the assistant asks before turning them on. Details, keys and undo steps: `docs/launcher.md`.
+
 ## Themes
 
 | Gotham (dark city) | Clean, no wallpaper |
 |---|---|
 | ![Gotham theme: dark city background, five-app dock](docs/screenshots/home-gotham-after.png) | ![Clean theme: plain dark background, five-app dock](docs/screenshots/home-no-wallpaper.png) |
 
-Five presets ship: `dark`, `batman`, `tesla`, `aurora` and `compact` (see `themes/README.md`). The Gotham picture uses a wallpaper, which this repo does not include; the presets are colour-only. A red theme is in progress.
+Five presets ship: `dark`, `batman`, `tesla`, `aurora` and `compact` (see `themes/README.md`). The Gotham picture uses a wallpaper, which this repo does not include; the presets are colour-only. The launcher also bundles 16 themes with their own wallpapers (`themes/README.md`).
 
 More screenshots, and how to take your own: `docs/screenshots/README.md`.
 
@@ -41,7 +54,7 @@ The assistant asks about your TV, network, theme, apps and IPTV, then shows each
 |---|---|---|
 | Debloat | Disables Google and TV-maker apps you do not use (`lists/`) | `scripts/revert.sh` |
 | Speed | Halves animation scales | `scripts/revert.sh` |
-| Launcher and theme | Dark, Batman, Tesla, Aurora or Compact (`themes/`) | `scripts/apply-theme.sh <tv> --reset` |
+| Launcher and theme | Dark, Batman, Tesla, Aurora or Compact (`themes/`), plus launcher options (`scripts/launcher_options.py`) | `scripts/apply-theme.sh <tv> --reset` |
 | IPTV | Public channels from iptv-org, checked and filtered for OwnTV (`iptv/`) | Remove the playlist in OwnTV |
 | SmartTube | Installed from its official release (`docs/smarttube.md`) | Uninstall it |
 | Free movies | Legal free sources (`docs/free-movies.md`) | Not applicable |
@@ -76,7 +89,7 @@ The tests use a fake `adb`, so they do not need a TV. They check the keep list, 
 ## Status
 
 - Tested: the scripts' dry-run and undo paths (fake ADB), the theme checker, the playlist verifier (a local test server), and the AI entry points.
-- Not tested here: a real TV run of these scripts, and the launcher build (`docs/launcher.md`). Test on your own TV first.
+- Not tested here: a real TV run of these scripts. The launcher builds and runs on its author's TV; build it yourself first (`docs/launcher.md`). Test on your own TV first.
 
 ## Credits
 

@@ -27,6 +27,21 @@ final class LastOpened {
         return pkg == null ? 0L : prefs(ctx).getLong(pkg, 0L);
     }
 
+    /** Milliseconds since the epoch when Home last opened the app, as a short "2h ago". */
+    static String ago(Context ctx, String pkg) {
+        return RecentArt.shortAgo(System.currentTimeMillis() - get(ctx, pkg));
+    }
+
+    /** Packages Home opened, newest first. */
+    static java.util.List<String> recent(Context ctx, int limit) {
+        java.util.List<java.util.Map.Entry<String, ?>> all = new java.util.ArrayList<>(prefs(ctx).getAll().entrySet());
+        java.util.Collections.sort(all, (a, b) -> Long.compare(
+                b.getValue() instanceof Long ? (Long) b.getValue() : 0L, a.getValue() instanceof Long ? (Long) a.getValue() : 0L));
+        java.util.List<String> out = new java.util.ArrayList<>();
+        for (java.util.Map.Entry<String, ?> e : all) if (out.size() < limit) out.add(e.getKey());
+        return out;
+    }
+
     /**
      * "5 minutes ago" within the hour, then the day and the time: "today, 11:40 am", "yesterday, 9:40 pm",
      * "3 days ago, 9:40 pm", "Oct 12, 9:40 pm". The parts are Android's own wording in the TV's language.

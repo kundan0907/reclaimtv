@@ -1,0 +1,11 @@
+{
+  "theme": "northern",
+  "theme_label": "Northern Lights",
+  "background_color": "#04080A",
+  "wallpaper": true,
+  "wallpaper_dim": 0,
+  "race_calendar": [],
+  "light_mode": false,
+  "widget_accent": "#52E08A",
+  "ambient_glow": false
+}

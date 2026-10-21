@@ -224,6 +224,7 @@
                         android:textAllCaps="true" />
 
                     <View
+                        android:id="@+id/clockDivider"
                         android:layout_width="1dp"
                         android:layout_height="18dp"
                         android:layout_gravity="bottom"
@@ -273,6 +274,24 @@
                             android:textAllCaps="true" />
                     </LinearLayout>
                 </LinearLayout>
+
+                <!-- Current weather under the clock and date, shown when weather is on. -->
+                <TextView
+                    android:id="@+id/weatherLine"
+                    android:gravity="left"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginTop="6dp"
+                    android:singleLine="true"
+                    android:ellipsize="end"
+                    android:drawablePadding="8dp"
+                    android:textColor="#E6FFFFFF"
+                    android:textSize="14sp"
+                    android:fontFamily="@font/outfit_regular"
+                    android:letterSpacing="0.03"
+                    android:focusable="false"
+                    android:visibility="gone" />
 
             </LinearLayout>
 
@@ -360,6 +379,8 @@
                 android:layout_height="match_parent"
                 android:paddingTop="10dp"
                 android:paddingBottom="40dp"
+                android:paddingStart="18dp"
+                android:paddingEnd="18dp"
                 android:clipToPadding="false"
                 android:clipChildren="false"
                 android:overScrollMode="never"
@@ -367,6 +388,32 @@
                 android:descendantFocusability="afterDescendants" />
         </FrameLayout>
     </LinearLayout>
+
+    <!-- Calendar and days-left widgets, top right under the round buttons; shown with the dock's top shelf (month_card).
+         Each view is 8dp wider and taller on every side than its glass, which draws its halo there. -->
+    <com.gathin.tvhome.MonthCardView
+        android:id="@+id/monthCard"
+        android:layout_width="162dp"
+        android:layout_height="138dp"
+        android:layout_gravity="top|end"
+        android:layout_marginTop="72dp"
+        android:layout_marginEnd="48dp"
+        android:alpha="0"
+        android:focusable="true"
+        android:clickable="true"
+        android:visibility="gone" />
+
+    <com.gathin.tvhome.YearCardView
+        android:id="@+id/yearCard"
+        android:layout_width="162dp"
+        android:layout_height="90dp"
+        android:layout_gravity="top|end"
+        android:layout_marginTop="198dp"
+        android:layout_marginEnd="48dp"
+        android:alpha="0"
+        android:focusable="true"
+        android:clickable="true"
+        android:visibility="gone" />
 
     <!-- The single floating glass highlight that springs between tiles. -->
     <com.gathin.tvhome.GlassView

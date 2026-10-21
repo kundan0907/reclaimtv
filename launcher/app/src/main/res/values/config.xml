@@ -196,4 +196,19 @@
          Live TV window does not keep the screen on (CVTE): there the system screensaver would start in the
          middle of a programme. Can also be set with "home_idle_clock_minutes": 10 in a theme's config.json. -->
     <integer name="home_idle_clock_minutes">0</integer>
+    <!-- A month calendar card at the top right (shown with the dock's top shelf) and the weather under the date.
+         The weather needs the Internet permission: it asks Open-Meteo, and ipwho.is once a day for an approximate
+         location. Can also be set with "month_card": true and "weather": true in a theme's config.json. -->
+    <bool name="month_card">false</bool>
+    <bool name="weather">false</bool>
+    <!-- Dark text, light glass: for a theme with a light background. Set "light_mode": true in a theme's config.json. -->
+    <bool name="light_mode">false</bool>
+    <!-- A row under the apps: today's date, the weather and the apps you opened last. "widget_row": true in a theme. -->
+    <bool name="widget_row">false</bool>
+    <!-- Dock magnification: the focused dock tile grows to about 122%, its neighbours to 110% and 103%. "dock_magnify": true. -->
+    <bool name="dock_magnify">false</bool>
+    <!-- Quick-start tiles for gear on an HDMI input: "Label|match", match being part of the CEC device name (for example
+         "PlayStation|PlayStation"). A tile shows only while a matching input is there. Put "input:Label" in dock_apps to
+         place it in the dock; otherwise it sorts in with the other apps. -->
+    <string-array name="input_tiles" />
 </resources>

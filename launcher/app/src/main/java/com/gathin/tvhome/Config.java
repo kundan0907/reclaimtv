@@ -128,6 +128,21 @@ final class Config {
     final boolean ambientGlow;
     /** Minutes Home may sit untouched before the clock screensaver (config.xml, home_idle_clock_minutes); 0 is off. */
     final int homeIdleClockMinutes;
+    /** A month calendar card and the current weather on Home (config.xml, month_card and weather); both off by default. */
+    final boolean monthCard;
+    final boolean weather;
+    /** Dark text and light glass for a light background (config.xml, light_mode). */
+    final boolean lightMode;
+    /** A row under the apps with the date, the weather and the apps opened last (config.xml, widget_row). */
+    final boolean widgetRow;
+    /** The dock tile in focus grows, its neighbours a little less, like the macOS dock (config.xml, dock_magnify). */
+    final boolean dockMagnify;
+    /** Icon material is an owner choice, independent of the theme. */
+    final boolean glassIcons;
+    /** The widgets' theme colour (widget_accent in a theme's config.json); 0 keeps the neutral slate. */
+    final int widgetAccent;
+    /** HDMI quick-start tiles, "Label|match" each (config.xml, input_tiles); empty by default. */
+    final List<String> inputTiles;
 
     private Config(List<String> dockApps, boolean fillDock, List<String> hiddenApps, String liveTvPackage,
                    String liveTvAction, Map<String, String> launchActions, Map<String, String> appLabels,
@@ -138,7 +153,8 @@ final class Config {
                    int[] settingsKeycodes, boolean settingsKeyPanel, boolean wallpaperEnabled, File wallpaper, List<File> wallpapers,
                    int wallpaperRotationMinutes, int wallpaperDim, String wallpaperOrder, boolean overlayApplied,
                    Festival festival, int[] inputKeycodes, List<String> appKeys,
-                   List<RaceWeekend.Race> raceCalendar, boolean cinematicHome, boolean ambientGlow, int homeIdleClockMinutes) {
+                   List<RaceWeekend.Race> raceCalendar, boolean cinematicHome, boolean ambientGlow, int homeIdleClockMinutes,
+                   boolean monthCard, boolean weather, boolean lightMode, boolean widgetRow, boolean dockMagnify, boolean glassIcons, int widgetAccent, List<String> inputTiles) {
         this.inputKeycodes = inputKeycodes;
         this.appKeys = Collections.unmodifiableList(appKeys);
         this.dockApps = Collections.unmodifiableList(dockApps);
@@ -189,6 +205,14 @@ final class Config {
         this.cinematicHome = cinematicHome;
         this.ambientGlow = ambientGlow;
         this.homeIdleClockMinutes = homeIdleClockMinutes;
+        this.monthCard = monthCard;
+        this.weather = weather;
+        this.lightMode = lightMode;
+        this.widgetRow = widgetRow;
+        this.dockMagnify = dockMagnify;
+        this.glassIcons = glassIcons;
+        this.widgetAccent = widgetAccent;
+        this.inputTiles = Collections.unmodifiableList(inputTiles);
     }
 
     /** The folder the theme tools push into; null when external storage is unavailable. */
@@ -239,6 +263,14 @@ final class Config {
         boolean cinematic = res.getBoolean(R.bool.cinematic_home);
         boolean ambientGlow = res.getBoolean(R.bool.ambient_glow);
         int idleClockMinutes = res.getInteger(R.integer.home_idle_clock_minutes);
+        boolean monthCard = res.getBoolean(R.bool.month_card);
+        boolean weather = res.getBoolean(R.bool.weather);
+        boolean lightMode = res.getBoolean(R.bool.light_mode);
+        boolean widgetRow = res.getBoolean(R.bool.widget_row);
+        boolean dockMagnify = res.getBoolean(R.bool.dock_magnify);
+        boolean glassIcons = false;
+        int widgetAccent = 0;
+        List<String> inputTiles = new ArrayList<>(Arrays.asList(res.getStringArray(R.array.input_tiles)));
         boolean applied = false;
 
         File dir = dir(ctx);
@@ -288,6 +320,14 @@ final class Config {
             cinematic = bool(json, "cinematic_home", cinematic);
             ambientGlow = bool(json, "ambient_glow", ambientGlow);
             idleClockMinutes = integer(json, "home_idle_clock_minutes", idleClockMinutes, 0, 1440);
+            monthCard = bool(json, "month_card", monthCard);
+            weather = bool(json, "weather", weather);
+            lightMode = bool(json, "light_mode", lightMode);
+            widgetRow = bool(json, "widget_row", widgetRow);
+            dockMagnify = bool(json, "dock_magnify", dockMagnify);
+            glassIcons = bool(json, "glass_icons", glassIcons);
+            widgetAccent = color(json, "widget_accent", widgetAccent);
+            inputTiles = stringList(json, "input_tiles", inputTiles);
         }
         // A theme push or reset invalidates choices made on the TV. On first use, remember the
         // current theme without clearing choices from an older launcher version.
@@ -300,6 +340,7 @@ final class Config {
         if (chosenRows >= 0 && chosenRows <= 3) rowsBelow = chosenRows;
         animations = choices.getBoolean("animations", animations);
         advancedEffects = choices.getBoolean("advanced_effects", advancedEffects);
+        glassIcons = choices.getBoolean("glass_icons", glassIcons);
         File wallpaper = dir != null ? new File(dir, WALLPAPER_NAME) : null;
         if (wallpaper != null && !(wallpaper.isFile() && wallpaper.length() > 0)) wallpaper = null;
         // A theme can also switch the wallpaper off while the file is still there.
@@ -347,7 +388,7 @@ final class Config {
                 Math.max(0, Math.min(100, skyIntensity)), settingsKeycodes, settingsKeyPanel, wallpaperEnabled, wallpaper,
                 wallpapers, rotationMinutes, wallpaperDim, wallpaperOrder, applied,
                 festival, inputKeycodes, appKeys, json == null ? Collections.emptyList() : raceCalendar(json), cinematic, ambientGlow,
-                Math.max(0, idleClockMinutes));
+                Math.max(0, idleClockMinutes), monthCard, weather, lightMode, widgetRow, dockMagnify, glassIcons, widgetAccent, inputTiles);
     }
 
     /**
