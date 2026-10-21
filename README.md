@@ -1,8 +1,29 @@
 # tv-cleanup
 
-A skill for Claude Code and Codex that cleans up an Android TV or Google TV: it removes apps you do not use (reversibly), shortens animations, sets up IPTV in OwnTV, installs SmartTube, and applies a launcher theme you choose.
+Clean up an Android TV or Google TV: remove apps you do not use (reversibly), shorten animations, set up IPTV in OwnTV, install SmartTube, and apply a launcher theme you choose. It works as a skill for Claude Code and Codex, or with any AI assistant that can read this repo.
 
-Ask your assistant: "clean up my TV" or "set up IPTV on my TV". It asks a short questionnaire, shows the plan, and then runs it.
+## Before and after
+
+| Before: stock Google TV home | After: tv-cleanup launcher |
+|---|---|
+| ![Stock Google TV home: a featured title, a top picks row and every app in one long row](docs/screenshots/stock-home-before.png) | ![tv-cleanup home: a five-app dock, the clock, Inputs and Settings, on a dark city background](docs/screenshots/home-gotham-after.png) |
+
+What changed on the TV:
+
+- The launcher replaces Google TV's home, so the featured title and "Top free picks" rows are not shown. You see the apps you chose.
+- The dock holds the apps you pick, in the order you set. A theme sets which apps and how many.
+- Google TV's extra apps and TV-maker promotions are disabled, not uninstalled (`lists/`). The Play Store and Downloader are never touched.
+- Animations are shorter (`scripts/speed.sh`). Every change has an undo: `scripts/revert.sh`.
+
+## Themes
+
+| Gotham (dark city) | Clean, no wallpaper |
+|---|---|
+| ![Gotham theme: dark city background, five-app dock](docs/screenshots/home-gotham-after.png) | ![Clean theme: plain dark background, five-app dock](docs/screenshots/home-no-wallpaper.png) |
+
+Five presets ship: `dark`, `batman`, `tesla`, `aurora` and `compact` (see `themes/README.md`). The Gotham picture uses a wallpaper, which this repo does not include; the presets are colour-only. A red theme is in progress.
+
+More screenshots, and how to take your own: `docs/screenshots/README.md`.
 
 ## Set up with an AI
 
@@ -27,12 +48,6 @@ The assistant asks about your TV, network, theme, apps and IPTV, then shows each
 
 Nothing is uninstalled. The Play Store and Downloader are never touched (`lists/keep.txt`). See `docs/safety.md`.
 
-## Screenshots
-
-![Home screen on the author's TV: the dock, the top bar and no wallpaper](docs/screenshots/home-no-wallpaper.png)
-
-More screenshots and how to take your own: `docs/screenshots/README.md`.
-
 ## Quick start
 
 1. Paste the prompt from "Set up with an AI" into your assistant, or point Claude Code or Codex at this repo.
@@ -56,11 +71,11 @@ scripts/apply-theme.sh 192.0.2.10 themes/dark
 python3 -m unittest discover -s tests
 ```
 
-The tests use a fake `adb`, so they do not need a TV. They check the keep list, the setup-wizard and HOME guards, dry-run behaviour, the undo record and the theme checker.
+The tests use a fake `adb`, so they do not need a TV. They check the keep list, the setup-wizard and HOME guards, dry-run behaviour, the undo record, the theme checker and the AI entry points.
 
 ## Status
 
-- Tested: the scripts' dry-run and undo paths (fake ADB), the theme checker, and the playlist verifier (a local test server).
+- Tested: the scripts' dry-run and undo paths (fake ADB), the theme checker, the playlist verifier (a local test server), and the AI entry points.
 - Not tested here: a real TV run of these scripts, and the launcher build (`docs/launcher.md`). Test on your own TV first.
 
 ## Credits
