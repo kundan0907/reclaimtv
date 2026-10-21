@@ -4,6 +4,16 @@ A skill for Claude Code and Codex that cleans up an Android TV or Google TV: it 
 
 Ask your assistant: "clean up my TV" or "set up IPTV on my TV". It asks a short questionnaire, shows the plan, and then runs it.
 
+## Set up with an AI
+
+Paste this into any AI assistant:
+
+```text
+Set up my Android TV with https://github.com/kundan0907/tv-cleanup — start with START_HERE.md and ask before each change.
+```
+
+The assistant asks about your TV, network, theme, apps and IPTV, then shows each step before it runs. A cloud chat can plan and guide, but it cannot reach a TV on your home network. For the ADB steps, use Claude Code or the Codex CLI on the same Wi-Fi.
+
 ## What you get
 
 | Step | What it does | Undo |
@@ -25,9 +35,11 @@ More screenshots and how to take your own: `docs/screenshots/README.md`.
 
 ## Quick start
 
-1. Install the skill (see `SKILL.md`): `~/.claude/skills/tv-cleanup` for Claude Code, or `~/.agents/skills/tv-cleanup` for Codex.
-2. Turn on ADB on the TV (`docs/setup.md`).
-3. Ask your assistant to clean up the TV, then answer the questions.
+1. Paste the prompt from "Set up with an AI" into your assistant, or point Claude Code or Codex at this repo.
+2. Turn on ADB on the TV (`docs/setup.md`) when the assistant asks.
+3. Answer the questions. Each step is shown before it runs.
+
+Optional: install it as a skill (see `SKILL.md`).
 
 Run the scripts by hand if you prefer:
 

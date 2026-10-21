@@ -45,7 +45,9 @@ Work from the folder this file is in. Scripts are `scripts/*.sh` and `scripts/*.
 - `scripts/apply-theme.sh <tv-ip> --reset` removes the theme overlay.
 - Troubleshooting: `docs/troubleshooting.md`.
 
-## Install
+## Install (optional)
+
+Installing as a skill is optional. Any AI assistant can follow `START_HERE.md` instead.
 
 - **Claude Code:** `git clone https://github.com/kundan0907/tv-cleanup ~/.claude/skills/tv-cleanup`
 - **Codex:** `git clone https://github.com/kundan0907/tv-cleanup ~/.agents/skills/tv-cleanup` (Codex reads `~/.agents/skills`; use `~/.codex/skills` if your setup does).
