@@ -2,6 +2,10 @@
 
 Clean up an Android TV or Google TV: remove apps you do not use (reversibly), shorten animations, set up IPTV in OwnTV, install SmartTube, and apply a launcher theme you choose. It works as a skill for Claude Code and Codex, or with any AI assistant that can read this repo.
 
+![A glass Android TV launcher in eight themes: Northern Lights, Violet Aurora, Synthwave, Sunset, Carbon, Rosso Corsa, Iron Man arc reactor and Daylight](docs/screenshots/hero-themes.jpg)
+
+<p align="center"><img src="docs/screenshots/theme-cycle.gif" width="640" alt="The launcher cycling through its 16 themes"></p>
+
 ## Before and after
 
 | Before: stock Google TV home | After: tv-cleanup launcher |
@@ -17,26 +21,64 @@ What changed on the TV:
 
 ## The launcher
 
-The launcher in `launcher/` has a glass look and a few optional widgets. Everything is off until you choose it. You build and install the APK once (`docs/launcher.md`).
+A glass launcher with 16 themes, an Apple-style magnifying dock and optional widgets. Everything is off until you choose it. You build and install the APK once (`docs/launcher.md`).
 
-- 16 themes with wallpapers, including light versions, and optional theme rotation.
-- Glass app tiles and a glass dock with magnification.
-- Calendar (weekly or monthly), days-left-in-year and weather cards.
-- A widget row with a continue-watching tile.
-- Screensaver widgets, and a widget size setting.
-- A PlayStation, Xbox or Switch tile when one is on HDMI.
+### Glass dock
 
-Weather and the continue-watching picture use the internet, so the assistant asks before turning them on. Details, keys and undo steps: `docs/launcher.md`.
+The dock magnifies the app under focus, and a soft light in the theme's colour flows along it.
+
+![The home screen: a glass dock with five apps, a row of apps, and a widget row with calendar, year, weather and a continue-watching tile](docs/screenshots/features/dock.jpg)
+
+### Widgets that stay out of the way
+
+Press Up and the dock slides down to a thin lip. The calendar and the year card stay on screen, top right, stacked under the three buttons.
+
+| Dock tucked away | Widget row |
+|---|---|
+| ![Dock hidden: clock, weather, calendar and year card on the wallpaper](docs/screenshots/features/dock-hidden.jpg) | ![Widget row with calendar, year, weather and a continue-watching tile that shows the video you left](docs/screenshots/features/widget-row.jpg) |
+
+The continue-watching tile shows the real thumbnail and title of the last video (Big Buck Bunny by the Blender Foundation, CC BY 3.0, in these pictures).
+
+### Calendar and year
+
+Open the calendar with OK. It shows the week or the whole month, and remembers your choice. The year card counts the days left.
+
+| Weekly | Monthly | Days left in the year |
+|---|---|---|
+| ![Weekly calendar, October 18 to 24, today in green](docs/screenshots/features/calendar-weekly.jpg) | ![Monthly calendar for October 2026](docs/screenshots/features/calendar-monthly.jpg) | ![Year card: 71 days left, a dot for every day of 2026](docs/screenshots/features/year.jpg) |
+
+### Settings on the TV
+
+Everything is chosen on the TV with the remote: theme, theme rotation, widget size, glass or original icons, wallpaper.
+
+| Menu | Theme picker | Launcher settings |
+|---|---|---|
+| ![The gear menu](docs/screenshots/features/menu.jpg) | ![Theme picker](docs/screenshots/features/theme-picker.jpg) | ![Launcher settings](docs/screenshots/features/launcher-settings.jpg) |
+
+Also: weather under the clock, screensaver widgets, light mode, and a PlayStation, Xbox or Switch tile when one is on HDMI. Weather and the continue-watching picture use the internet, so the assistant asks before turning them on. Details, keys and undo steps: `docs/launcher.md`.
 
 ## Themes
 
-| Gotham (dark city) | Clean, no wallpaper |
-|---|---|
-| ![Gotham theme: dark city background, five-app dock](docs/screenshots/home-gotham-after.png) | ![Clean theme: plain dark background, five-app dock](docs/screenshots/home-no-wallpaper.png) |
+Sixteen themes ship in the APK, each with its own accent colour that tints the dock light, the widgets and the focus glow. Pick one in gear > Theme, or let them rotate.
 
-Five presets ship: `dark`, `batman`, `tesla`, `aurora` and `compact` (see `themes/README.md`). The Gotham picture uses a wallpaper, which this repo does not include; the presets are colour-only. The launcher also bundles 16 themes with their own wallpapers (`themes/README.md`).
+| | | |
+|---|---|---|
+| ![Northern Lights](docs/screenshots/themes/northern.jpg) | ![Violet Aurora](docs/screenshots/themes/violet.jpg) | ![Synthwave](docs/screenshots/themes/synthwave.jpg) |
+| **Northern Lights** `#52E08A` | **Violet Aurora** `#C65BFF` | **Synthwave** `#FF4FD8` |
+| ![Sunset](docs/screenshots/themes/sunset.jpg) | ![Aurora](docs/screenshots/themes/aurora.jpg) | ![Carbon](docs/screenshots/themes/carbon.jpg) |
+| **Sunset** `#FF8A5B` | **Aurora** `#3FD0C0` | **Carbon** `#4DA3FF` |
+| ![Gotham](docs/screenshots/themes/gotham.jpg) | ![Iron Man · Arc reactor](docs/screenshots/themes/ironman-arc.jpg) | ![Black Panther · Vibranium](docs/screenshots/themes/panther-vibranium.jpg) |
+| **Gotham** `#A9B4C8` | **Iron Man · Arc reactor** `#35D6F5` | **Black Panther · Vibranium** `#8A5CF5` |
+| ![RCB](docs/screenshots/themes/rcb.jpg) | ![Rosso Corsa](docs/screenshots/themes/rosso.jpg) | ![Mountains](docs/screenshots/themes/mountains.jpg) |
+| **RCB** `#E0252B` | **Rosso Corsa** `#E03A3A` | **Mountains** `#8D99AE` |
+| ![Daylight](docs/screenshots/themes/daylight.jpg) | ![Aurora · Light](docs/screenshots/themes/aurora-light.jpg) | ![Rosso Corsa · Light](docs/screenshots/themes/rosso-light.jpg) |
+| **Daylight** `#5B8DEF` | **Aurora · Light** `#1FA896` | **Rosso Corsa · Light** `#C9302C` |
+| ![Mountains · Light](docs/screenshots/themes/mountains-light.jpg) |   |   |
+| **Mountains · Light** `#6B7A90` |   |   |
 
-More screenshots, and how to take your own: `docs/screenshots/README.md`.
+Five colour-only presets (`dark`, `batman`, `tesla`, `aurora`, `compact`) also ship in `themes/` and need no wallpaper. The Gotham picture in "Before and after" is from the author's TV. Details: `themes/README.md`.
+
+Image credits: Mountains, Ansel Adams (public domain); Northern Lights, Johannes Groll (CC0); Violet Aurora, Stephan Sprinz (CC BY 4.0); the rest are generated or custom artwork (`launcher/THEME-CREDITS.md`). More screenshots, and how to take your own: `docs/screenshots/README.md`.
 
 ## Set up with an AI
 
