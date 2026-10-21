@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SmartTube tile: red field with a play ring. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:width="320dp" android:height="180dp">
+        <shape android:shape="rectangle">
+            <gradient android:angle="315" android:startColor="#FFEF3B2D" android:endColor="#FF8A0F0A" />
+        </shape>
+    </item>
+    <item android:width="84dp" android:height="84dp" android:gravity="center"
+        android:drawable="@drawable/ic_glyph_smarttube" />
+</layer-list>
