@@ -1,0 +1,5 @@
+# Google apps most people do not use on a TV. Used by `debloat.sh <tv> light` and `full`.
+# Each one is disabled for user 0 only, never uninstalled. Comment out anything you use.
+com.google.android.youtube.tvmusic        # YouTube Music
+com.google.android.play.games             # Play Games
+com.google.android.syncadapters.calendar  # Calendar sync

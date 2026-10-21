@@ -1,0 +1,15 @@
+{
+  "note": "Apps the questionnaire can offer. scripts check each package with `pm list packages` before use. verify=true means the package name still needs a check on your TV.",
+  "apps": [
+    {"id": "youtube", "package": "com.google.android.youtube.tv", "name": "YouTube", "role": "video", "free": true, "verify": true, "source": "Play Store"},
+    {"id": "smarttube", "package": "org.smarttube.stable", "name": "SmartTube", "role": "video", "free": true, "verify": false, "source": "https://github.com/yuliskov/SmartTube/releases (open source, sideload with Downloader)"},
+    {"id": "owntv", "package": "tv.own.owntv", "name": "OwnTV", "role": "iptv", "free": true, "verify": false, "source": "https://github.com/ahXN00/OwnTV"},
+    {"id": "tubi", "package": "com.tubitv", "name": "Tubi", "role": "free-movies", "free": true, "verify": true, "source": "Play Store"},
+    {"id": "pluto", "package": "tv.pluto.android", "name": "Pluto TV", "role": "free-movies", "free": true, "verify": true, "source": "Play Store"},
+    {"id": "plex", "package": "com.plexapp.android", "name": "Plex", "role": "free-movies", "free": true, "verify": true, "source": "Play Store"},
+    {"id": "spotify", "package": "com.spotify.tv.android", "name": "Spotify", "role": "music", "free": false, "verify": true, "source": "Play Store"},
+    {"id": "netflix", "package": "com.netflix.ninja", "name": "Netflix", "role": "video", "free": false, "verify": true, "source": "Play Store"},
+    {"id": "prime", "package": "com.amazon.amazonvideo.livingroom", "name": "Prime Video", "role": "video", "free": false, "verify": true, "source": "Play Store"},
+    {"id": "downloader", "package": "com.esaba.downloader", "name": "Downloader", "role": "sideload", "free": true, "verify": false, "source": "Play Store"}
+  ]
+}

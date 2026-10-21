@@ -1,0 +1,12 @@
+# Never disabled, whatever a debloat list says. Read by scripts/debloat.sh.
+com.android.vending                        # Play Store: needed to install and update apps
+com.esaba.downloader                       # Downloader: sideloads SmartTube and other APKs
+com.gathin.tvhome                          # the launcher (themes/ and launcher/)
+com.google.android.tvlauncher              # stock launcher: a fallback Home
+com.android.tv.settings                    # TV settings
+com.android.settings                       # Android settings
+com.google.android.gms                     # Google Play services
+com.google.android.tungsten.setupwraith    # setup wizard: see docs/safety.md before touching it
+com.google.android.katniss                 # Google Assistant interactor (voice); disable only if you do not use voice
+org.smarttube.stable                       # SmartTube
+tv.own.owntv                               # OwnTV

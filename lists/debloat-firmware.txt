@@ -1,0 +1,6 @@
+# Packages from TV-maker firmware. Used by `debloat.sh <tv> full` only, on top of debloat-google.txt.
+# Verified on a Skyworth SWTV-23NA-4KR3 (Android 11). Other firmware may not have these; absent ones are skipped.
+com.coocaa.demonow.lightining   # in-store demo mode
+com.smartdevice.dailyshortcut   # daily shortcut promotions
+com.smartdevice.dailymanage     # daily management promotions
+com.smartdevice.myapp           # preinstalled app promotions

@@ -1,0 +1,20 @@
+{
+  "dock_apps": [
+    "com.google.android.youtube.tv",
+    "org.smarttube.stable",
+    "tv.own.owntv",
+    "com.tubitv",
+    "tv.pluto.android"
+  ],
+  "background_color": "#050505",
+  "dock_title": true,
+  "dock_row": true,
+  "always_show_names": false,
+  "columns": 5,
+  "rows_below_dock": 1,
+  "ambient_glow": false,
+  "animations": true,
+  "reduced_motion": false,
+  "show_stats": false,
+  "wallpaper": false
+}
