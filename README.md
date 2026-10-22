@@ -25,7 +25,7 @@ A glass launcher with 16 themes, an Apple-style magnifying dock and optional wid
 
 ### Glass dock
 
-The dock magnifies the app under focus, and a soft light in the theme's colour flows along it.
+The dock magnifies the app under focus, and a soft light in the theme's colour flows along it. Row-two and widget tiles share one lit, glowing outline, so the whole home reads as one piece.
 
 ![The home screen: a glass dock with five apps, a row of apps, and a widget row with calendar, year, weather and a continue-watching tile](docs/screenshots/features/dock.jpg)
 
@@ -55,7 +55,13 @@ Everything is chosen on the TV with the remote: theme, theme rotation, widget si
 |---|---|---|
 | ![The gear menu](docs/screenshots/features/menu.jpg) | ![Theme picker](docs/screenshots/features/theme-picker.jpg) | ![Launcher settings](docs/screenshots/features/launcher-settings.jpg) |
 
-Also: weather under the clock, screensaver widgets, light mode, and a PlayStation, Xbox or Switch tile when one is on HDMI. Weather and the continue-watching picture use the internet, so the assistant asks before turning them on. Details, keys and undo steps: `docs/launcher.md`.
+### Screensaver
+
+The clock, date, weather, calendar and year card drift together at the top left, the cards stacked one under the other.
+
+![Screensaver: a large clock top left, with the weather line, the calendar card and the year card stacked beneath it over the Northern Lights](docs/screenshots/features/screensaver.jpg)
+
+Also: weather under the clock, light mode, and a PlayStation, Xbox or Switch tile when one is on HDMI. Weather and the continue-watching picture use the internet, so the assistant asks before turning them on. Details, keys and undo steps: `docs/launcher.md`.
 
 ## Themes
 

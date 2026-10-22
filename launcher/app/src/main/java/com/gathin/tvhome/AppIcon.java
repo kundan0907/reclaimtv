@@ -23,9 +23,17 @@ final class AppIcon extends Drawable {
     private final RectF panel = new RectF(1, 1, 319, 179);
     private final Drawable glyph;
     private final boolean prime;
+    private final Paint glowRim = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint glowInner = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final RectF innerPanel = new RectF();
+    /** Rows under the dock and the widget tiles share a lit edge with a soft accent glow just inside it. */
+    private boolean outlined;
+    private final int accent;
 
     AppIcon(Context ctx, String pkg, Drawable fallback, boolean light, int accent) {
         int id = glyph(pkg);
+        this.accent = Tint.accent(accent);
+        outlined = pkg.equals("widget");
         prime = pkg.equals("com.amazon.amazonvideo.livingroom");
         Drawable source = id != 0 ? ctx.getDrawable(id) : fallback;
         if (source instanceof AdaptiveIconDrawable) source = ((AdaptiveIconDrawable) source).getForeground();
@@ -53,6 +61,19 @@ final class AppIcon extends Drawable {
         rim.setShader(new LinearGradient(0, 0, 320, 180,
                 light ? 0x99FFFFFF : Tint.withAlpha(ink, 0x80),
                 Tint.withAlpha(accent, 0x35), Shader.TileMode.CLAMP));
+        glowRim.setStyle(Paint.Style.STROKE);
+        glowRim.setStrokeWidth(2.6f);
+        glowRim.setShader(new LinearGradient(0, 0, 320, 180,
+                light ? 0xE6FFFFFF : Tint.withAlpha(ink, 0xE0),
+                Tint.withAlpha(this.accent, 0xC0), Shader.TileMode.CLAMP));
+        glowInner.setStyle(Paint.Style.STROKE);
+        glowInner.setStrokeWidth(3.6f);
+    }
+
+    void setOutlined(boolean outlined) {
+        if (this.outlined == outlined) return;
+        this.outlined = outlined;
+        invalidateSelf();
     }
 
     void setFocused(boolean focused) {
@@ -68,6 +89,7 @@ final class AppIcon extends Drawable {
             case "com.spotify.tv.android": return R.drawable.ic_brand_spotify;
             case "com.apple.atve.androidtv.appletv": return R.drawable.ic_brand_appletv;
             case "org.smarttube.stable": return R.drawable.ic_glyph_smarttube;
+            case "com.community.mbox.tv": return R.drawable.ic_glyph_moviebox;
             case "tv.own.owntv": return R.drawable.ic_glyph_owntv;
             case "ar.tvplayer.tv": return R.drawable.ic_glyph_tivimate;
             case "com.esaba.downloader": return R.drawable.ic_glyph_downloader;
@@ -82,7 +104,17 @@ final class AppIcon extends Drawable {
         c.translate(b.left, b.top);
         c.scale(b.width() / 320f, b.height() / 180f);
         c.drawRoundRect(panel, 28, 28, material);
-        c.drawRoundRect(panel, 28, 28, rim);
+        if (outlined) {
+            for (int i = 0; i < 4; i++) {
+                float inset = 3f + i * 3.4f;
+                innerPanel.set(panel.left + inset, panel.top + inset, panel.right - inset, panel.bottom - inset);
+                glowInner.setColor(Tint.withAlpha(accent, Math.round(0x46 * (1f - i / 4f))));
+                c.drawRoundRect(innerPanel, 28 - inset, 28 - inset, glowInner);
+            }
+            c.drawRoundRect(panel, 28, 28, glowRim);
+        } else {
+            c.drawRoundRect(panel, 28, 28, rim);
+        }
         if (prime) {
             c.drawText("prime", 160, 99, mark);
             mark.setStyle(Paint.Style.STROKE);
