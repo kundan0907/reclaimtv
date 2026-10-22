@@ -68,7 +68,6 @@ final class AppIcon extends Drawable {
             case "com.spotify.tv.android": return R.drawable.ic_brand_spotify;
             case "com.apple.atve.androidtv.appletv": return R.drawable.ic_brand_appletv;
             case "org.smarttube.stable": return R.drawable.ic_glyph_smarttube;
-            case "com.community.mbox.tv": return R.drawable.ic_glyph_moviebox;
             case "tv.own.owntv": return R.drawable.ic_glyph_owntv;
             case "ar.tvplayer.tv": return R.drawable.ic_glyph_tivimate;
             case "com.esaba.downloader": return R.drawable.ic_glyph_downloader;

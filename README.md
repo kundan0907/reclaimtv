@@ -96,6 +96,70 @@ Set up my Android TV with https://github.com/kundan0907/tv-cleanup — start wit
 
 The assistant asks about your TV, network, theme, apps and IPTV, then shows each step before it runs. A cloud chat can plan and guide, but it cannot reach a TV on your home network. For the ADB steps, use Claude Code or the Codex CLI on the same Wi-Fi.
 
+## The flow
+
+```mermaid
+flowchart LR
+    A[Turn ADB on<br>on the TV] --> B[Assistant or<br>scripts connect]
+    B --> C[Dry run:<br>show the plan]
+    C --> D{You approve<br>each step}
+    D --> E[Debloat:<br>disable packages]
+    D --> F[Speed:<br>shorter animations]
+    D --> G[Launcher:<br>install APK, set Home]
+    D --> H[Theme and options:<br>push config.json]
+    D --> I[IPTV and<br>SmartTube]
+    E & F & G & H & I --> J[Turn ADB off]
+```
+
+Every step is optional, shown before it runs, and has an undo (`scripts/revert.sh`, `apply-theme.sh --reset`, or uninstalling the app you added). Nothing is uninstalled and nothing needs root.
+
+## What gets better on your TV
+
+| Before | After |
+|---|---|
+| A home screen led by a featured title and "Top picks" rows, with every app in one long row | A launcher that shows the apps you chose, in the order you chose, with a dock and optional widgets |
+| Google and TV-maker promotion apps running in the background | Those packages disabled, not uninstalled (`lists/`); the Play Store and Downloader are never touched |
+| Default animation speed | Animation scales halved (`scripts/speed.sh`), restored by `revert.sh` |
+| A video or song keeps playing behind the home screen after you press Home | Home pauses it |
+| One look | 16 themes, light mode, a clock screensaver, and optional weather, calendar and continue-watching |
+| Finding free TV and a good player yourself | Public iptv-org channels checked for OwnTV, and SmartTube installed from its official release |
+
+Not claimed: a faster TV or a measured memory saving. The repo has not benchmarked either.
+
+## How the repo is organised
+
+| Path | What it is |
+|---|---|
+| `START_HERE.md`, `SKILL.md` | The script an AI assistant follows, and the skill entry for Claude Code and Codex |
+| `scripts/` | `connect`, `debloat`, `speed`, `apply-theme`, `revert` and the launcher-option tools. Plain shell and Python over ADB |
+| `lists/` | Packages to disable (`debloat-google.txt`, `debloat-firmware.txt`) and the never-touch list (`keep.txt`) |
+| `launcher/` | The launcher app (`com.gathin.tvhome`), built with `build-and-install.sh` |
+| `themes/`, `catalog/` | Theme presets and the app catalog the assistant offers for your dock |
+| `iptv/` | Builds an OwnTV playlist from the iptv-org index |
+| `docs/` | Setup, safety, launcher options, troubleshooting |
+| `tests/` | Run with a fake `adb`, so no TV is needed |
+
+## Install the launcher APK
+
+Fastest if you only want the launcher. Download `tv-home.apk` from the [latest release](https://github.com/kundan0907/tv-cleanup/releases), turn on ADB (`docs/setup.md`), then:
+
+```bash
+adb connect <tv-ip>:5555
+adb install -r --user 0 tv-home.apk
+```
+
+This installs the app only. It does not make it Home and it does not debloat. For that, use `launcher/build-and-install.sh <tv-ip>` or the assistant flow above, which switches Home safely and rolls back if it does not take. The APK is signed with the project's debug key, so it updates over a copy built from this repo without clearing settings. A copy signed with another key must be uninstalled first, which resets the launcher.
+
+## How it works
+
+Everything runs from your computer over ADB (Android's debug bridge, over Wi-Fi). Nothing is installed on the TV except the launcher and the apps you choose.
+
+1. **Debloat.** `lists/` holds one package name per line. `scripts/debloat.sh` checks every name, skips anything on `lists/keep.txt` (Play Store, Downloader, the launchers, the setup wizard), then runs `pm disable-user --user 0` on the rest. It records what it disabled, so `scripts/revert.sh` re-enables exactly those. Use `--dry-run` to see the plan first.
+2. **Launcher.** `launcher/build-and-install.sh <tv-ip>` builds the APK, installs it, starts it, and only then disables the stock launcher and sets this one as Home. It then asks the TV who owns Home and puts the stock launcher back if the answer is not this one. The launcher is an ordinary app that declares the HOME category; nothing is flashed.
+3. **Themes and options.** `scripts/apply-theme.sh` pushes one `config.json` that the launcher reads over its built-in settings. `--reset` removes it, so no rebuild is needed to change or undo a theme.
+4. **Pause on Home.** When Home is pressed while something is playing (SmartTube, Spotify and so on), the launcher sends a pause key so it does not keep playing behind the home screen. It does nothing when nothing is playing. It is not configurable; remove the `pauseMedia()` calls in `MainActivity.java` to turn it off.
+5. **The assistant.** `START_HERE.md` is the script an AI follows: it asks about your TV and preferences, shows each step and its dry-run, and waits for a yes before it changes anything. It asks you to turn ADB off at the end.
+
 ## What you get
 
 | Step | What it does | Undo |
