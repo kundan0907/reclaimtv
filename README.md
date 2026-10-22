@@ -96,6 +96,16 @@ Set up my Android TV with https://github.com/kundan0907/tv-cleanup — start wit
 
 The assistant asks about your TV, network, theme, apps and IPTV, then shows each step before it runs. A cloud chat can plan and guide, but it cannot reach a TV on your home network. For the ADB steps, use Claude Code or the Codex CLI on the same Wi-Fi.
 
+## How it works
+
+Everything runs from your computer over ADB (Android's debug bridge, over Wi-Fi). Nothing is installed on the TV except the launcher and the apps you choose.
+
+1. **Debloat.** `lists/` holds one package name per line. `scripts/debloat.sh` checks every name, skips anything on `lists/keep.txt` (Play Store, Downloader, the launchers, the setup wizard), then runs `pm disable-user --user 0` on the rest. It records what it disabled, so `scripts/revert.sh` re-enables exactly those. Use `--dry-run` to see the plan first.
+2. **Launcher.** `launcher/build-and-install.sh <tv-ip>` builds the APK, installs it, starts it, and only then disables the stock launcher and sets this one as Home. It then asks the TV who owns Home and puts the stock launcher back if the answer is not this one. The launcher is an ordinary app that declares the HOME category; nothing is flashed.
+3. **Themes and options.** `scripts/apply-theme.sh` pushes one `config.json` that the launcher reads over its built-in settings. `--reset` removes it, so no rebuild is needed to change or undo a theme.
+4. **Pause on Home.** When Home is pressed while something is playing (SmartTube, Spotify and so on), the launcher sends a pause key so it does not keep playing behind the home screen. It does nothing when nothing is playing. It is not configurable; remove the `pauseMedia()` calls in `MainActivity.java` to turn it off.
+5. **The assistant.** `START_HERE.md` is the script an AI follows: it asks about your TV and preferences, shows each step and its dry-run, and waits for a yes before it changes anything. It asks you to turn ADB off at the end.
+
 ## What you get
 
 | Step | What it does | Undo |

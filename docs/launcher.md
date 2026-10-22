@@ -14,6 +14,7 @@ The package name stays `com.gathin.tvhome`, because the theme provider and the s
 - Console tiles for HDMI devices, such as a PlayStation.
 - Widget size (small, medium, large).
 - A SmartTube banner and glyph.
+- Pressing Home pauses any playing media, so an app does not keep playing behind the home screen.
 
 ## Build and install
 
