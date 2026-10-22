@@ -87,8 +87,9 @@ final class ClockScene {
         }
         float widgetScale = WidgetScale.factor(root.getContext());
         if (monthCard != null) {
-            WidgetScale.apply(monthCard, widgetScale);
-            WidgetScale.apply(yearCard, widgetScale);
+            // The cards are stacked under the clock, so Large would run off the bottom of a 1080p screen.
+            WidgetScale.apply(monthCard, Math.min(widgetScale, 1f));
+            WidgetScale.apply(yearCard, Math.min(widgetScale, 1f));
         }
         weatherLine = config.weather ? root.findViewById(R.id.dreamWeather) : null;
         if (weatherLine != null) weatherLine.setTextSize(18 * widgetScale);

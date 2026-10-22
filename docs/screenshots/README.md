@@ -9,7 +9,7 @@ Taken from the author's TV. The README shows all of them.
 | `home-no-wallpaper.png` | tv-cleanup launcher with a plain background. |
 | `hero-themes.jpg`, `theme-cycle.gif` | Eight themes side by side, and all 16 in a loop. |
 | `themes/<id>.jpg` | Each bundled theme on the home screen. |
-| `features/*.jpg` | Dock, widget row, hidden dock, calendar, year card and settings. |
+| `features/*.jpg` | Dock, widget row, hidden dock, calendar, year card, screensaver and settings. |
 
 Theme and feature pictures are 1280x720 JPEGs from the author's TV. The continue-watching tile shows Big Buck Bunny (Blender Foundation, CC BY 3.0).
 

@@ -90,8 +90,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:orientation="horizontal"
-            android:gravity="top"
+            android:orientation="vertical"
             android:visibility="gone">
 
             <com.gathin.tvhome.MonthCardView
@@ -105,7 +104,7 @@
                 android:id="@+id/dreamYearCard"
                 android:layout_width="210dp"
                 android:layout_height="98dp"
-                android:layout_marginStart="12dp"
+                android:layout_marginTop="12dp"
                 android:focusable="false"
                 android:clickable="false" />
         </LinearLayout>
