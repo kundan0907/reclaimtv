@@ -1247,8 +1247,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     public void onTileFocused(int position, View card) {
         lastFocused = position;
         lastFocusedKey = adapter.keyAt(position);
-        ImageView tileArt = card.findViewById(R.id.banner);
-        glass.setVisibility(tileArt != null && tileArt.getDrawable() instanceof AppIcon ? View.INVISIBLE : View.VISIBLE);
+        glass.setVisibility(View.VISIBLE);   // the dock's own light hides the halo there (setSuppressed below)
         // Focus restored before the first layout (cold start): the tile has no size yet, and the glass
         // would be sized to 2*pad. Run again once the tile is laid out.
         if (card.getWidth() == 0) {

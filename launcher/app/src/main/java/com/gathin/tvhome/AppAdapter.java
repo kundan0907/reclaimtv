@@ -413,11 +413,10 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 String ago = RecentArt.shortAgo(now - (thumb != null ? Math.max(when, Thumbs.savedAt(ctx, a.pkg)) : when));
                 Drawable base = thumb != null ? thumb : glassIcons || a.banner == null || a.banner.getConstantState() == null
                         ? new AppIcon(ctx, a.pkg, a.icon, light, themeAccent) : a.banner.getConstantState().newDrawable().mutate();
-                if (base instanceof AppIcon) ((AppIcon) base).setOutlined(true);
                 String pill = ctx.getString(thumb != null ? R.string.recent_continue : R.string.recent_recent, ago);
                 zone.add(new Entry(Entry.RECENT, title != null ? title : a.label,
                         new ComponentName(a.pkg, "recent/" + a.component.getClassName()),
-                        a.component, new RecentArt(ctx, base, pill, title, themeAccent), a.icon, null, a.ambient, 0));
+                        a.component, new RecentArt(ctx, base, pill, title), a.icon, null, a.ambient, 0));
                 break;
             }
         }
@@ -606,10 +605,7 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         boolean glassTile = glassIcons && (e.kind == Entry.APP || e.kind == Entry.INPUT || e.kind == Entry.HOME_SETTINGS);
         if (glassTile && e.glassArt == null) e.glassArt = new AppIcon(ctx, e.pkg, e.icon, light, themeAccent);
         Drawable art = glassTile ? e.glassArt : e.banner;
-        if (art instanceof AppIcon) {
-            ((AppIcon) art).setFocused(focused);
-            ((AppIcon) art).setOutlined(e.kind == Entry.WIDGET || !(dockRow && position < dockSize));
-        }
+        if (art instanceof AppIcon) ((AppIcon) art).setFocused(focused);
         boolean bare = glassTile || e.kind == Entry.WIDGET || e.kind == Entry.RECENT;
         h.card.setBackground(bare || art != null && art.getOpacity() == PixelFormat.OPAQUE ? null : h.cardBackground);
         if (art != null) {
