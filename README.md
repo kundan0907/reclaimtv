@@ -26,6 +26,7 @@ Target hardware: Android TV and Google TV. Works as a skill for Claude Code and 
 | Animations | Default scales | Shorter scales (`scripts/speed.sh`) |
 | Playback on Home | A video or song keeps playing behind the home screen | Pressing Home pauses it |
 | Reversibility | Not applicable | Every change has an undo: `scripts/revert.sh` |
+| Free viewing | Subscriptions and ad-supported apps | Optional SmartTube for YouTube without ads, and OwnTV with public iptv-org channels |
 
 No speed or memory gain is claimed; the repository has not measured either.
 
@@ -60,8 +61,9 @@ No speed or memory gain is claimed; the repository has not measured either.
 - The gear menu on the TV sets theme, theme rotation, widget size, glass or original icons, and wallpaper with the remote.
 - Every launcher option is off until you choose it (`docs/launcher.md`).
 - Weather and the continue-watching picture use the internet, so they stay off until you agree.
-- `iptv/` builds an OwnTV playlist from the iptv-org index, checked and filtered (`docs/owntv.md`).
-- SmartTube installs from its official release (`docs/smarttube.md`), and free movie sources are listed in `docs/free-movies.md`.
+- The assistant offers two optional installs for free viewing without a subscription: SmartTube, a YouTube client with no ads, and OwnTV with a playlist from the public iptv-org index. Neither installs without your approval (`docs/smarttube.md`, `docs/owntv.md`).
+- SmartTube installs from its official release, and OwnTV loads channels that `iptv/` has checked and filtered.
+- Free movie sources are listed in `docs/free-movies.md`.
 
 ---
 
