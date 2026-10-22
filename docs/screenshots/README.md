@@ -5,8 +5,8 @@ Taken from the author's TV. The README shows all of them.
 | File | What it shows |
 |---|---|
 | `stock-home-before.png` | Stock Google TV home, before the launcher and the debloat. |
-| `home-gotham-after.png` | tv-cleanup launcher with the Gotham look. The wallpaper is not in this repo. |
-| `home-no-wallpaper.png` | tv-cleanup launcher with a plain background. |
+| `home-gotham-after.png` | reclaimtv launcher with the Gotham look. The wallpaper is not in this repo. |
+| `home-no-wallpaper.png` | reclaimtv launcher with a plain background. |
 | `hero-themes.jpg`, `theme-cycle.gif` | Eight themes side by side, and all 16 in a loop. |
 | `themes/<id>.jpg` | Each bundled theme on the home screen. |
 | `features/*.jpg` | Dock, widget row, hidden dock, calendar, year card, screensaver and settings. |

@@ -1,5 +1,5 @@
 ---
-name: tv-cleanup
+name: reclaimtv
 description: Clean up an Android TV or Google TV (any brand): debloat with reversible steps, shorten animations, set up IPTV in OwnTV from iptv-org playlists, install SmartTube, apply a launcher theme (Dark, Batman, Tesla, Aurora or Compact, or one of 16 bundled themes) and launcher options (glass icons, dock magnification, weather, calendar, widgets, console tile), and undo any of it. Use when the user asks to clean up, debloat, speed up or personalise their TV, set up IPTV or SmartTube on it, pick or change a TV theme, or revert a previous cleanup.
 ---
 
@@ -60,6 +60,6 @@ Work from the folder this file is in. Scripts are `scripts/*.sh` and `scripts/*.
 
 Installing as a skill is optional. Any AI assistant can follow `START_HERE.md` instead.
 
-- **Claude Code:** `git clone https://github.com/kundan0907/tv-cleanup ~/.claude/skills/tv-cleanup`
-- **Codex:** `git clone https://github.com/kundan0907/tv-cleanup ~/.agents/skills/tv-cleanup` (Codex reads `~/.agents/skills`; use `~/.codex/skills` if your setup does).
+- **Claude Code:** `git clone https://github.com/kundan0907/reclaimtv ~/.claude/skills/reclaimtv`
+- **Codex:** `git clone https://github.com/kundan0907/reclaimtv ~/.agents/skills/reclaimtv` (Codex reads `~/.agents/skills`; use `~/.codex/skills` if your setup does).
 - Requires `adb` (Android platform-tools) and `python3`. The tests need nothing else: `python3 -m unittest discover -s tests`.

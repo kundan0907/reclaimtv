@@ -1,8 +1,8 @@
-# START HERE: set up an Android TV with tv-cleanup
+# START HERE: set up an Android TV with reclaimtv
 
 You are an AI assistant. The user wants their Android TV or Google TV cleaned up: unused apps disabled (reversibly), animations shortened, IPTV set up in OwnTV, SmartTube installed, and a launcher theme applied. This file is the whole procedure. Follow it in order, and ask before every change.
 
-Repo: https://github.com/kundan0907/tv-cleanup
+Repo: https://github.com/kundan0907/reclaimtv
 
 ## Rules
 
@@ -49,7 +49,7 @@ Before enabling these two, tell the user the privacy impact in one sentence each
 
 ## Step 2: Local mode
 
-a. Get the repo: `git clone https://github.com/kundan0907/tv-cleanup`, then work inside that folder.
+a. Get the repo: `git clone https://github.com/kundan0907/reclaimtv`, then work inside that folder.
 
 b. Ask the user to turn on ADB debugging on the TV (`docs/setup.md`), and to give you the TV's IP address.
 
