@@ -4,7 +4,7 @@ import re
 import unittest
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-COPY_TEXT = ("Set up my Android TV with https://github.com/kundan0907/tv-cleanup — "
+COPY_TEXT = ("Set up my Android TV with https://github.com/kundan0907/reclaimtv — "
              "start with START_HERE.md and ask before each change.")
 PERSONAL = re.compile(r"moviebox|community\.mbox|\b(?!192\.0\.2\.)\d{1,3}(?:\.\d{1,3}){3}\b", re.I)
 
@@ -29,10 +29,10 @@ class StartHereTests(unittest.TestCase):
 
 
 class ReadmeTests(unittest.TestCase):
-    def test_copy_text_is_exact_and_sits_above_the_feature_list(self):
+    def test_copy_text_is_exact_and_sits_in_option_a_above_option_b(self):
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
         self.assertIn(COPY_TEXT, readme)
-        self.assertLess(readme.index("## Set up with an AI"), readme.index("## What you get"))
+        self.assertLess(readme.index("### Option A"), readme.index("### Option B"))
 
 
 class PersonalDataTests(unittest.TestCase):
