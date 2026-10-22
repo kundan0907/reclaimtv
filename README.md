@@ -25,7 +25,7 @@ A glass launcher with 16 themes, an Apple-style magnifying dock and optional wid
 
 ### Glass dock
 
-The dock magnifies the app under focus, and a soft light in the theme's colour flows along it. Row-two and widget tiles share one lit, glowing outline, so the whole home reads as one piece.
+The dock magnifies the app under focus, and a soft light in the theme's colour flows along it. Every tile under the dock lights the same soft theme-coloured glow when you focus it, so the whole home behaves as one piece.
 
 ![The home screen: a glass dock with five apps, a row of apps, and a widget row with calendar, year, weather and a continue-watching tile](docs/screenshots/features/dock.jpg)
 

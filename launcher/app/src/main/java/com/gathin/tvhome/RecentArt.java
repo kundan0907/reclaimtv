@@ -27,19 +27,13 @@ final class RecentArt extends Drawable {
     private final Paint fill = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final TextPaint text = new TextPaint(Paint.ANTI_ALIAS_FLAG);
     private final RectF box = new RectF();
-    private final Paint rim = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private final RectF panel = new RectF(1, 1, 319, 179);
     private StaticLayout titleLayout;
 
-    RecentArt(Context ctx, Drawable base, String pill, String title, int accent) {
+    RecentArt(Context ctx, Drawable base, String pill, String title) {
         this.base = base;
         this.pill = pill;
         this.title = title;
         text.setTypeface(ctx.getResources().getFont(R.font.outfit_medium));
-        // The same lit edge the other row-two and widget tiles have, so a picture tile sits in the row.
-        rim.setStyle(Paint.Style.STROKE);
-        rim.setStrokeWidth(2.6f);
-        rim.setShader(new LinearGradient(0, 0, 320, 180, 0xE0FFFFFF, Tint.withAlpha(Tint.accent(accent), 0xC0), Shader.TileMode.CLAMP));
     }
 
     @Override public void draw(Canvas c) {
@@ -68,7 +62,6 @@ final class RecentArt extends Drawable {
             titleLayout.draw(c);
             c.restore();
         }
-        if (!(base instanceof AppIcon)) c.drawRoundRect(panel, 28, 28, rim);
         text.setTextSize(21);
         text.setTypeface(Typeface.create(text.getTypeface(), Typeface.NORMAL));
         float pw = text.measureText(pill) + 28;

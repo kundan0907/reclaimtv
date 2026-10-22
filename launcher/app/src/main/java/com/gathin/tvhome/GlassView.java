@@ -8,7 +8,7 @@ import android.util.AttributeSet;
 import android.view.View;
 
 /**
- * A faint local glow for original artwork and widget tiles. Glass app tiles draw their own focus light.
+ * A faint local glow for original artwork and widget tiles.
  * One instance follows the focused tile with spring animations.
  */
 public class GlassView extends View {
